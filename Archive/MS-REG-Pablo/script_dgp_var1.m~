@@ -1,0 +1,22 @@
+% syms a12 a13
+% syms b12 b13 b22 b33
+% syms sig1 sig2 sig3
+% syms mu1
+
+% Structural form
+% A(st)*X(t) = C(st) + B(st)*X(t-1) + Z(st)*eps(t)
+
+% Reduced form
+% X(t) = D(st) + E(st)*X(t-1) + O(st)*eta(t)
+
+
+A = [ 1 a12 a13; 0 1 0; 0 0 1];
+C = [mu1; 0 ; 0];
+B = [ 0 b12 b13; 0 b22 0; 0 0 b33];
+Z = [sig1 0 0 ; 0 sig2 0; 0 0 sig3];
+
+% Reduced form 
+D = inv(A)*C;
+E = inv(A)*B;
+O = inv(A)*Z;
+

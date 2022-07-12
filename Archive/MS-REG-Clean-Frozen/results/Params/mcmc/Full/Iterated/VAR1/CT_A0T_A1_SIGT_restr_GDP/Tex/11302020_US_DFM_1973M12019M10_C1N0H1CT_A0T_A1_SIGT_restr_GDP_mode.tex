@@ -1,0 +1,31 @@
+\documentclass{article}
+% Packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{caption}
+\usepackage[paperwidth=5in,paperheight=3in,centering,margin=0.1in,nofoot]{geometry}
+\usepackage{booktabs}
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\begin{document}
+\pagenumbering{gobble}
+%<*tag>
+\begin{table}[ht!]\centering\ra{1.3}
+\caption{Posterior Mode Distribution: iterated, US, DFM, h = 1 \\ Sample: 1973M1-2019M10}
+\vspace*{0.2cm}
+\begin{tabular}{c l c c}
+\hline \hline 
+\textbf{Coefficient} & \textbf{Description} & \textbf{Bad Regime} & \textbf{Good Regime} \\
+\hline
+$\alpha_y(s_t)$ & Constant & 0.0889 & 0.167 \\
+& & [-0.18,0.32] & [0.02,0.34] \\
+$\beta_y(s_t)$ & Financial Factor & 0.0277 & -7e-04 \\
+& & [-0.15,0.2] & [-0.19,0.21] \\
+$\gamma_y(s_t)$ & Macro Factor & 2.798 & 1.9951 \\
+& & [2.46,3.19] & [1.69,2.32] \\
+$\sigma_y(s_t)$ & Shock to GDP & 2.9383 & 1.617 \\
+& & [2.7,3.23] & [1.5,1.74] \\
+\hline
+\end{tabular}
+\end{table}
+%</tag>
+\end{document}

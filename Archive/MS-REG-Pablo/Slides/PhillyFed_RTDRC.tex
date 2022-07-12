@@ -1,0 +1,714 @@
+
+
+% \documentclass[notes=show]{beamer}
+\documentclass[xcolor=dvipsnames, xcolor=table, 10pt]{beamer}
+\setbeamercovered{dynamic}
+\usepackage [utf8]{inputenc}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{amsmath}
+%\usepackage{mathpazo}
+\usepackage{natbib}             % Option: Use NatBib bibliography styles
+\usepackage{hyperref}
+\usepackage{multimedia}
+\usepackage{graphicx}
+\usepackage{helvet}
+\usepackage[english]{babel}
+%\usepackage[latin1]{inputenc}
+\usepackage{comment}
+\usepackage{color}
+\usepackage{epstopdf}
+\usepackage{appendixnumberbeamer}
+\usepackage{transparent}
+\usepackage{xcolor}
+\usepackage{relsize}
+\usepackage{booktabs}
+\usepackage{amsthm}
+\usepackage{threeparttable, tablefootnote} % table footnote
+%\usepackage{PlayfairDisplay}
+\usepackage{caption}
+\DeclareMathOperator*{\argmin}{argmin} % thin space, limits underneath in displays
+%\usepackage{bbm}
+
+\setcounter{MaxMatrixCols}{10}
+
+% \USEINNERTHEME{CIRCLESu}
+%\usefonttheme{serif}
+% \usecolortheme{orchid}
+
+\usecolortheme[RGB={26,58,95}]{structure}
+\beamertemplatenavigationsymbolsempty
+
+\definecolor{orange}{RGB}{255,127,0}
+\definecolor{upf}{RGB}{192,0,37}
+\definecolor{euiblue}{RGB}{56,136,199}
+\definecolor{fedblue}{RGB}{26,58,95}
+\definecolor{darkred}{rgb}{0.55, 0.0, 0.0}
+\definecolor{applegreen}{rgb}{0.55, 0.71, 0.0}
+\definecolor{orange}{rgb}{0.93, 0.53, 0.18}
+\definecolor{darkgreen}{rgb}{0.1020    0.5961    0.3137}
+\definecolor{pennblue}{rgb}{0.0039    0.1211    0.3555}
+\newcommand{\bb}[1]{{\color{euiblue}#1}}
+\newcommand{\fb}[1]{{\color{fedblue}#1}}
+\newcommand{\pb}[1]{{\color{fedblue}#1}}
+\newcommand{\gre}[1]{{\color{applegreen}#1}}
+\newcommand{\rr}[1]{{\color{darkred}#1}}
+\newcommand{\orr}[1]{{\color{orange}#1}}
+\newcommand{\gr}[1]{{\color{darkgreen}#1}}
+
+\usepackage{mathtools}
+
+ \newcommand{\lefta}{ \left[\begin{array} }
+\newcommand{\righta}{ \end{array} \right]}
+
+\newcommand*{\vcenterimage}[1]{\vcenter{\hbox{\includegraphics[width=0.35\linewidth]{#1}}}}
+\newcommand*{\vcenterarrow}{\vcenter{\hbox{$\Longrightarrow$}}}
+\newcommand*{\h}{\hspace{0.15cm}}
+
+\makeatletter
+\def\blfootnote{\gdef\@thefnmark{}\@footnotetext}
+\makeatother
+
+
+\useitemizeitemtemplate{%
+    \raise1.5pt\hbox{\color{beamerstructure}$\bullet$}%
+}
+\usesubitemizeitemtemplate{%
+    \small\raise1.5pt\hbox{\color{beamerstructure}$\bullet$}%
+}
+\usesubsubitemizeitemtemplate{%
+    \raise1.5pt\hbox{\color{beamerstructure}$\circ$}%
+}
+
+
+\setbeamersize{text margin left=1.5em,text margin right=1.5em}
+\setbeamertemplate{footline}[frame number]
+
+\usetheme{boadilla}
+
+
+\begin{document}
+
+%\playfair
+
+\title[Understanding Growth-at-Risk]{\textbf{Understanding Growth-at-Risk:\\ A Markov-Switching Approach}}
+\thispagestyle{empty}
+\author[Caldara, Cascaldi-Garcia, Cuba-Borda, Loria]{\textbf{Dario Caldara \\ Danilo Cascaldi-Garcia \\ Pablo Cuba-Borda \\ Francesca Loria }\\ \medskip \emph{Federal Reserve Board} \\ \bigskip
+\emph{2020 Conference on Real-Time Data Analysis, Methods and Applications}\vspace{-0.5cm}}
+
+%\date[Class II - FOMC]{\emph{May 12, 2020}}
+%\date[May 12, 2020]{\emph{May 12, 2020}}
+\date{October 8, 2020}
+% \maketitle
+
+% \begin{frame}{Overview}
+%  \tableofcontents
+%  \end{frame}
+
+%\setcounter{framenumber}{0}
+
+\begin{frame}
+\titlepage
+\vspace{-0.2cm}
+\begin{block}{}
+	{\scriptsize These views are are solely the responsibility of the authors and should not be interpreted as reflecting the view of the Board of Governors of the Federal Reserve System or of any other person associated with the Federal Reserve System.}
+\end{block}
+\end{frame}
+
+%-----------------------------------------------------------------
+\begin{frame}{Motivation}
+\begin{itemize}
+\item Risk management is an (increasingly) important consideration for policy decisions
+\begin{itemize}
+\medskip
+\item \pb{Evans (2019)}: importance of risk for model forecast in $r^*$ environment
+\end{itemize}
+\medskip
+\item Quantifying risks to the economic outlook
+\begin{itemize}
+\medskip
+\item \pb{Gertlear and Liang (2020)}: importance of sources of tail-risk
+\end{itemize}
+\medskip
+\item Lively debate about measurement and sources of risks:
+\medskip
+  \begin{itemize}
+  \item Can we reliably detect time-variation in downside risk?
+  \medskip
+    \begin{itemize}
+      \item \cite{ABG19}: {Yes}
+        \medskip
+        \item \cite{PMRRH2020}: {Unclear}
+    \end{itemize}
+\medskip
+  \item What are the drivers of downside risk?
+\medskip
+     \begin{itemize}
+      \item \cite{ABG19}: Financial conditions
+        \medskip
+        \item \cite{PMRRH2020}: Unclear
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+
+%-----------------------------------------------------------------
+\begin{frame}{Our paper}
+\vspace*{0.12in}
+\begin{itemize}
+\item Markov-switching structure to model the \rr{entire} distribution of future real GDP growth \rr{conditional on economic activity and financial conditions}.
+\medskip
+     \begin{itemize}
+     \item Endogenous transition probabilities depend on macroeconomic and financial conditions
+\medskip
+     \item Parsimonious model to capture features of growth-at-risk
+\end{itemize}
+\bigskip
+\item Advantage of Markov-switching model (MS):
+       \medskip
+       \begin{itemize}
+        \item Explicit about GAR mechanism
+        \medskip
+        \item Semi-structural interpretation $\rightarrow$ structural macro
+        \medskip
+         \item Facilitates interpretation of Quantile Regression models (QR)
+       \end{itemize}
+\medskip
+\item Use MS as complementary to QR for risk assessment
+\end{itemize}
+\end{frame}
+
+%-----------------------------------------------------------------
+
+\begin{frame}{The paper in one figure...}
+\only<1->{
+\begin{quote}
+\only<1>{\scriptsize{
+  ``Financial market conditions have deteriorated, and tighter credit conditions and increased uncertainty have the \rr{potential to restrain economic growth going forward}. In these circumstances, although recent data suggest that the {economy has continued to expand at a moderate pace}, the Federal Open Market Committee judges that the \rr{downside risks to growth have increased appreciably}.''
+\\ \begin{flushright} \textit{August 17, 2007
+FOMC statement}\end{flushright}}
+}
+
+\only<2>{\scriptsize{
+  ``Financial market conditions have deteriorated, and tighter credit conditions and increased uncertainty have the \rr{potential to restrain economic growth going forward}. In these circumstances, although recent data suggest that the \gr{economy has continued to expand at a moderate pace}, the Federal Open Market Committee judges that the \rr{downside risks to growth have increased appreciably}.''
+\\ \begin{flushright} \textit{August 17, 2007
+FOMC statement}\end{flushright}}
+}
+\end{quote}
+}
+\begin{figure}
+\only<1>{\includegraphics[width=0.7\linewidth]{FiguresPhillyFed/SVAR_StateDependent_2Regimes_Density_Aug2007_3.pdf}}
+\only<2>{\includegraphics[width=0.7\linewidth]{FiguresPhillyFed/SVAR_StateDependent_2Regimes_Density_Aug2007_4.pdf}}\par
+\end{figure}
+\vspace*{-0.25cm}
+\only<1->{  \begin{itemize}
+    \only<1> { \item Optimistic forecast but concern about \rr{downside risk} $\rightarrow$ MS model left tail}
+    \only<2> { \item MS model is a weighted average of \gr{normal} and \rr{bad} regimes
+\item Weights function of macroeconomic and financial data}
+  \end{itemize}
+}
+\end{frame}
+
+%-----------------------------------------------------------------
+
+\begin{frame}{Why a MS model to understand growth-at-risk?}
+ \begin{figure}
+   \includegraphics[width=0.85\linewidth]{FiguresPhillyFed/SVAR_StateDependent_2Regimes_Density_Aug2007_5.pdf}
+  \end{figure}
+\begin{itemize}
+\item MS can match distributions from QR model
+\end{itemize}
+%\begin{itemize}
+%    \item MS and QR models capture downside risk
+%    \item MS complementary tool for risk assessment
+%    \item Advantage: explicit mechanism of growth-at-risk
+%  \end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------
+\begin{frame}{A Markov-switching model of GAR}
+\label{main:msmodel}
+\vspace*{-0.2in}
+\begin{eqnarray*}
+\underbrace{\bar{\Delta} {y}_{t+1,t+12}}_{\mbox{Average future growth}} &=& \rr{\alpha_y} (\orr{s_t}) + \pb{\beta_y} (\orr{s_t}) {f_t} + \pb{\gamma_y} (\orr{s_t}) m_t + \rr{\sigma_y} (\orr{s_t}) \varepsilon^y_t, \label{eq:MS_growth}%\\
+\end{eqnarray*}
+
+\begin{itemize}
+\item $f_t$ and $m_t$ follow a VAR(1) structure \hyperlink{app:msmodel}{\beamerbutton{Full model}}
+\medskip
+\item{Three ingredients:}
+\medskip
+    \begin{enumerate}
+    \item \rr{Refige specific mean and volatility}
+      \begin{itemize}
+        \medskip
+      \item $s_t=1: \underbrace{\mbox{high growth, low volatility}}_{\mbox{Normal regime}}$. $ s_t=2: \underbrace{\mbox{low growth, high volatility}}_{\mbox{Bad regime}}$
+      \end{itemize}
+      \bigskip
+    \item \pb{Time-variation in sensitivity to fundamentals}
+      \begin{itemize}
+        \medskip
+      \item Akin to non-linear dynamics of DSGE models\\ \citep{GKP2019,FernandezVillaverdeHurtadoGalo2019,ACHSV2020}
+      \end{itemize}
+      \bigskip
+\item \orr{Financial and macroeconomic conditions influence regime transitions}
+\begin{itemize}
+\medskip
+\item Logistic function for $\mathbb{P}\left(s_{t+1} = 2 | s_t = 1\right)$ and $\mathbb{P}\left(s_{t+1} = 1 | s_t = 2\right)$
+\end{itemize}
+\end{enumerate}
+\end{itemize}
+
+\end{frame}
+
+
+%-----------------------------------------------------------------
+
+\begin{frame}{Macro and financial conditions}
+\label{main:data}
+\begin{itemize}
+    \item Mixed-frequency DFM (real-time) estimates of \textbf{$f_t$} and \textbf{$m_t$} \citep{AruobaDieboldScotti2009}. Sample  Jan-1973 to May-2020.
+    % \begin{enumerate}
+    % 	\item $f_t$: VXO; Excess Bond Premium; TED spread; CBill Spread.\medskip
+    % 	\item $m_t$: IP, retail sales, new export order component of the PMI survey, initial unemployment insurance claims, quarterly GDP growth
+    % \end{enumerate}
+    % \medskip
+\end{itemize}
+
+\begin{figure}
+     {\includegraphics[width=0.5\linewidth,keepaspectratio=true]{FiguresPhillyFed/slides_data_FF.pdf}}\hspace*{-0.1in}
+     {\includegraphics[width=0.5\linewidth,keepaspectratio=true]{FiguresPhillyFed/slides_data_MF.pdf}}
+\end{figure}
+
+\begin{itemize}
+\item DFM-byproduct: (real-estimate) of monthly GDP
+\medskip
+\item Monthly GDP tracks well existing measures \citep{stock1989new,lewis2020us} \hyperlink{app:mgdp}{\beamerbutton{show}}
+\end{itemize}
+
+
+\end{frame}
+
+%-----------------------------------------------------------------
+
+\begin{frame}{Markov-switching model captures GAR...}
+\vspace*{-0.25in}
+\begin{eqnarray*}
+\bar{\Delta} {y}_{t+1,t+12} &=& \rr{\alpha_y (s_t)} + \pb{\beta_y (s_t)} f_t + \pb{\gamma_y (s_t)} m_t + \rr{\sigma_y (s_t)} \varepsilon^y_t
+\end{eqnarray*}
+\begin{itemize}
+\item \rr{Negative correlation between mean and volatility}
+\bigskip
+\small
+\begin{table}[ht!]
+  \centering
+  \vspace{-0.25cm}
+  \begin{tabular}{p{1.5cm} p{1cm} p{2cm} p{1cm} p{2cm}}
+\hline
+& \multicolumn{2}{c}{\textbf{Bad Regime}} & \multicolumn{2}{c}{\textbf{Normal Regime}} \\
+    \hline
+  $\alpha_y(s_t)$   & -0.99 & [-1.25,-0.75] & \h0.59 & [\h0.48,\h0.68]  \\
+  $\sigma_y(s_t)$   & \h2.60 & [\h2.35,\h2.89] & \h0.64 & [\h0.57,\h0.71]  \\
+  \midrule
+    \midrule
+    \end{tabular}%
+\end{table}%
+\normalsize
+\item \pb{Time-variation in sensitivity to fundamental}
+\bigskip
+\small
+\begin{table}[ht!]
+  \centering
+  \vspace{-0.25cm}
+  \begin{tabular}{p{1.5cm} p{1cm} p{2cm} p{1cm} p{2cm}}
+\hline
+& \multicolumn{2}{c}{\textbf{Bad Regime}} & \multicolumn{2}{c}{\textbf{Normal Regime}} \\
+    \hline
+  $\beta_y(s_t)$    & -0.29 & [-0.49,-0.08] & -0.02 & [-0.08,\h0.04]  \\
+  $\gamma_y(s_t)$   & \h0.54 & [\h0.22,\h0.91] & \h0.29 & [\h0.15,\h0.41]  \\
+  \midrule
+    \midrule
+    \end{tabular}%
+\end{table}%
+\end{itemize}
+
+\normalsize
+\begin{itemize}
+     \item Asymmetric response to $m_t$ and $f_t$ between and within regimes regimes
+\end{itemize}
+
+\end{frame}
+
+%-----------------------------------------------------------------
+
+\begin{frame}{Endogenous regime transition probabilities}
+\begin{itemize}
+\item \textbf{\gr{normal}-to-\rr{bad}}: $\mathbb{P}\left(s_{t+1} = 2 | s_t =1 \right) &=& \frac{1}{1+exp(a_{12} - b_{12} f_t - c_{12} m_t)}$
+
+\begin{figure}
+    \includegraphics[width=0.85\linewidth,keepaspectratio=true]{FiguresPhillyFed/SVAR_StateDependent_2Regimes_Pr12_fitted.pdf}
+\end{figure}
+\medskip
+\item \textbf{\rr{bad}-to-\gr{normal}}: $\mathbb{P}\left(s_{t+1} = 1 | s_t = 2\right) &=& \frac{1}{1+exp(a_{21} - b_{21} f_t - c_{21} m_t)}$
+\begin{figure}
+    \includegraphics[width=0.85\linewidth,keepaspectratio=true]{FiguresPhillyFed/SVAR_StateDependent_2Regimes_Pr21_fitted.pdf}
+\end{figure}
+\end{itemize}
+
+\end{frame}
+
+%-----------------------------------------------------------------
+
+\begin{frame}{The predictive distribution of GDP growth}
+\vspace*{-0.5in}
+%\begin{eqnarray*}
+%\bar{\Delta} {y}_{t+1,t+12} &=& \alpha_y (s_t) + \beta_y (s_t) f_t + \gamma_y (s_t) m_t + \sigma_y (s_t) \varepsilon^y_t
+%\end{eqnarray*}
+
+\begin{align*}
+p\left(\bar{\Delta} y_{t+1,t+H}|\mathcal{I}_t\right) &= \int_\theta \int_{\epsilon^y_t} \left[ \int_{s_{t-H+1:t}} p(\bar{\Delta} y_{t+1,t+H}, s_{t-H+1:t} | \mathcal{I}_t,\theta) ds_{t-H+1:t} \right] \\ &  \times p(\epsilon^y_t|\mathcal{I}_t,\theta) p(\theta|\mathcal{I}_t) d \epsilon^y_t  d \theta
+\end{align*}
+
+\begin{itemize}
+\item Sources of uncertantinty:
+  \begin{enumerate}
+    \medskip
+    \item Parameter uncertainty $p(\theta|\mathcal{I}_t)$
+    \medskip
+    \item Shock uncertaninty $p(\epsilon^y_t|\mathcal{I}_t,\theta)$
+    \medskip
+    \item Regime uncertainty $p(\bar{\Delta} y_{t+1,t+H}, s_{t-H+1:t} | \mathcal{I}_t,\theta)$
+  \end{enumerate}
+\bigskip
+
+\item Draw from $p\left(\bar{\Delta} y_{t+1,t+H}|\mathcal{I}_t\right)$ following \cite{DS2013Handbook}
+\begin{itemize}
+\medskip
+\item Challenge: $\mathcal{I}_t=\left\{\bar{\Delta}y_{t-H+1,t},f_{t},m_{t},s_{t-H}\right\} \rightarrow$ real-time inference of $s_t$
+
+% does not contain $y_{t+1},\dots \y_{t+H} \rightarrow \bar{\Delta} y_{t-11,t-12+H}, \dots $ unobserved
+\medskip
+\item Uncertainty about $s_t$ through direct simulation of the Markov-chain
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+%-----------------------------------------------------------------
+
+\begin{frame}{Simulated regime $s_t$}
+\medskip
+\vspace*{-0.25cm}
+\begin{figure}
+\caption*{$\mathbb{P}(s_t=2)$}
+     \includegraphics[width=0.85\linewidth,keepaspectratio=true]{FiguresPhillyFed/SVAR_StateDependent_2Regimes_PrReg2.pdf}
+\end{figure}
+
+\end{frame}
+
+
+%-----------------------------------------------------------------
+
+\begin{frame}{The evolution of Growth-at-Risk}
+\begin{itemize}
+\item MS model captures asymmetric dynamics of conditional quantiles
+%\item Measures of vulnerability: \textbf{SF} and \textbf{LR} positively correlated and \textbf{SF} more volatile
+\end{itemize}
+\centering
+\begin{figure}
+    \includegraphics[width=0.85\linewidth,keepaspectratio=true]{FiguresPhillyFed/SVAR_StateDependent_2Regimes_Quantiles_MS.pdf}
+\end{figure}
+
+\end{frame}
+
+%-----------------------------------------------------------------
+
+\begin{frame}{It is not about MS vs QR...}
+\label{main:qrmodel}
+\vspace*{-0.1in}
+\begin{itemize}
+\medskip
+\item Follow QR framework of \cite{ABG19}
+\begin{eqnarray*}
+\widehat{\mathcal{Q}}_{\tau}(\bar{\Delta} {y}_{t+1,t+12}|x_t) &=& \hat{\alpha}_{\tau} + \hat{\beta}_{\tau} f_t + \hat{\gamma}_{\tau} m_t, \label{eq:GAR}
+\end{eqnarray*}
+\item $\hat{\alpha}_\tau$, $\hat{\beta}_\tau$ and $\hat{\gamma}_\tau$ fold all the mechanims of GAR \hyperlink{app:qrmodel}{\beamerbutton{Results}}
+
+\medskip
+%  \begin{itemize}
+%    \medskip
+%         \medskip
+%\item In MS model, lower quantile associated with transition to \textit{bad regime}
+%      \item MS and QR complementary tools for risk assessment
+%  \end{itemize}
+\end{itemize}
+\vspace*{-0.2in}
+\begin{figure}
+    \includegraphics[width=0.85\linewidth,keepaspectratio=true]{FiguresPhillyFed/SVAR_StateDependent_2Regimes_Quantiles_MS_QR.pdf}
+\end{figure}
+\end{frame}
+
+%-----------------------------------------------------------------
+\begin{frame}{Taking stock}
+\begin{itemize}
+\medskip
+  \item MS and QR models capture growth-at-risk
+\medskip
+   \begin{itemize}
+       \item Similar dynamis in lower and upper quantiles
+         \medskip
+       \item Lower quantiles more volatile than upper quantile \citep{ABG19}
+       \medskip
+       \item MS-QR link and identification coming from sorting of observations
+    \end{itemize}
+\medskip
+\item Novel findings in MS and QR model
+\begin{itemize}
+      \medskip
+     \item Asymetry 1: Lower quantile more responsive than upper quantile economic conditions
+       \medskip
+     \item Asymetry 2: Lower quantile more responsive to macroeconomic factor
+\end{itemize}
+\medskip
+\item MS and QR as complementary tools for risk assessment
+\end{itemize}
+\end{frame}
+%-----------------------------------------------------------------
+
+\begin{frame}{Risk assessment: onset of 2008 financial crisis}
+
+\begin{figure}
+    \includegraphics[width=0.95\linewidth,keepaspectratio=true]{FiguresPhillyFed/SVAR_StateDependent_2Regimes_RiskAssessment_GFC.pdf}
+\end{figure}
+\end{frame}
+
+%-----------------------------------------------------------------
+
+\begin{frame}{COVID-19 build-up of risk}
+
+\begin{itemize}
+\item Predictive distribution in March-2020
+\medskip
+\item Two vintages:
+\begin{itemize}
+\medskip
+\item \textbf{March-13}: Financial turmoil $\rightarrow$ increase downside risk
+\medskip
+\item \pb{\textbf{April-2}}: Initial claims rose $\sim7$ million $\rightarrow$ $\textit{bad regime}$
+\end{itemize}
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=0.65\linewidth,keepaspectratio=true]{FiguresPhillyFed/SVAR_StateDependent_2Regimes_Density_Mar2020.pdf}
+\end{figure}
+\end{frame}
+
+
+
+%-----------------------------------------------------------------
+
+\begin{frame}{Conclusions}
+\begin{itemize}
+\medskip
+\item Markov-switching model with endogenous regime transitions
+\medskip
+\item MS complementary model to QR to captures growth-at-risk
+\medskip
+\item MS explicit about the features associated with growth-at-risk
+\medskip
+\item Asymmetry in the conditional distribution of future GDP growth
+\begin{itemize}
+\medskip
+\item GDP is more sensitive to fundamental in ``bad'' times
+\medskip
+\item In ``bad times'' macro conditions more important than financial conditions
+\end{itemize}
+\medskip
+\item Use MS model for risk assessment
+\medskip
+\item To do: Take real-time analysis into account
+\end{itemize}
+\end{frame}
+
+
+\section{Thank You}
+\begin{frame}[noframenumbering]
+\thispagestyle{empty}
+       \begin{center}
+         \structure{\Huge {\color{black}{\insertsection}}}
+       \end{center}
+   \end{frame}
+
+%-----------------------------------------------------------------
+
+%%%%%%%%%%%
+% APPENDIX
+\appendix
+
+
+% This sets the page counter back to 1:
+\setcounter{framenumber}{0}
+% And this makes LaTeX include the letter "A" in the page numbering
+\renewcommand{\insertframenumber}{A-\arabic{framenumber}}
+\renewcommand{\theframenumber}{A-\arabic{framenumber}}
+
+\frame{
+\frametitle{References}
+\bibliographystyle{ecca}
+\bibliography{GarRef}
+}
+
+
+
+
+%-----------------------------------------------------------------
+\begin{frame}{Illustration}
+\vspace*{0.12in}
+ \begin{itemize}
+     \item GDP growth features time-variation in mean and volatility
+    \bigskip
+     \item \rr{Growth-at-Risk (GAR)}: Conditional mean and volatility are negatively correlated
+\end{itemize}
+
+\begin{figure}
+     \includegraphics[width=0.65\linewidth,keepaspectratio=true]{Figures/univariatefull-VC.pdf}
+\end{figure}
+\end{frame}
+
+%-----------------------------------------------------------------
+
+\begin{frame}{Monthly GDP estimate}
+\label{app:mgdp}
+\begin{itemize}
+\item DFM also provides real-estimate of monthly GDP $\rightarrow$ assesment of buildup of risks at high frequency
+\bigskip
+
+\item Monthly GDP tracks well other existing measures:
+\begin{itemize}
+  \medskip
+  \item \cite{stock1989new}, IHS-Markit, \cite{lewis2020us}
+\end{itemize}
+
+\end{itemize}
+
+\begin{figure}
+     \includegraphics[width=0.65\linewidth,keepaspectratio=true]{FiguresPhillyFed/slides_data_GDP.pdf}
+\end{figure}
+\hyperlink{main:data}{\beamerbutton{Back}}
+\end{frame}
+
+%-----------------------------------------------------------------
+
+\begin{frame}{Markov switching model of GAR}
+\label{app:msmodel}
+\vspace*{-0.2in}
+\begin{eqnarray*}
+\bar{\Delta} {y}_{t+1,t+12} &=& \alpha_y (s_t) + \beta_y (s_t) f_t + \gamma_y (s_t) m_t + \sigma_y (s_t) \varepsilon^y_t, \label{eq:MS_growth}%\\
+f_t &=& \alpha_f + \beta_f f_{t-1} + \gamma_f m_t + \eta_{f} %m_{t-1} + \sigma_f \varepsilon^f_t, \label{eq:MS_f} \\
+m_t &=&  \alpha_m  +\beta_{m} f_{t-1} + \eta_m m_{t-1} + \sigma_m \varepsilon^m_t, \label{eq:MS_m}
+\end{eqnarray*}
+
+\begin{itemize}
+    \item $s_t=\left\{1,2\right\} \rightarrow \left\{normal, bad\right\}$: captures the unobserved economic state
+\bigskip
+\item $s_t$ follows Markov process with \textbf{endogenous transition probabilites}:
+
+\begin{eqnarray*}
+\mathbb{P}\left(s_{t+1} = 2 | s_t = 1\right) &=& \frac{1}{1+exp(a_{12} - b_{12} f_t - c_{12} m_t)},\\
+\mathbb{P}\left(s_{t+1} = 1 | s_t = 2\right) &=& \frac{1}{1+exp(a_{21} - b_{21} f_t - c_{21} m_t)}.
+\end{eqnarray*}
+
+\end{itemize}
+
+%\textbf{Endogenous Transitions}
+\begin{itemize}
+%\item Regime 1 \textit{(normal)}: High average growth, low volatility
+%\item Regime 2 \textit{(bad)}: Low average growth, high volatility
+%\item In the paper:
+%\begin{itemize}
+%\item 3-regime and additional Markov-chain for $\sigma_y$
+%\item Compare to fixed transition MS model
+%\end{itemize}
+\end{itemize}
+\hyperlink{main:msmodel}{\beamerbutton{Back}}
+\end{frame}
+
+
+%-----------------------------------------------------------------
+
+\begin{frame}{MS model: transition probabilities}
+\begin{itemize}
+\item Similar response of transition probabilities to FF and MF
+\end{itemize}
+\begin{figure}
+    \includegraphics[width=0.45\linewidth,keepaspectratio=true]{FiguresPhillyFed/SVAR_StateDependent_2Regimes_Pr12.pdf}
+    \includegraphics[width=0.45\linewidth,keepaspectratio=true]{FiguresPhillyFed/SVAR_StateDependent_2Regimes_Pr21.pdf}
+\end{figure}
+
+
+\end{frame}
+
+
+%-----------------------------------------------------------------
+\begin{frame}{Quantile regression: estimation results}
+\label{app:qrmodel}
+\begin{eqnarray*}
+\widehat{\mathcal{Q}}_{\tau}(\bar{\Delta} {y}_{t+1,t+12}|x_t) &=& \hat{\alpha}_{\tau} + \hat{\beta}_{\tau} f_t + \hat{\gamma}_{\tau} m_t, \label{eq:GAR}
+\end{eqnarray*}
+
+\begin{itemize}
+\item $\Delta {y}_{t+1,t+12}$ is calculated from our monthly GDP series
+\medskip
+\item $\hat{\alpha}_\tau$, $\hat{\beta}_\tau$ and $\hat{\gamma}_\tau$ fold all the mechanims of GAR
+  \begin{itemize}
+    \medskip
+     \item Lower quantile with similar growth than MS \textit{bad regime}
+       \medskip
+     \item Lower quantile more responsive to $f_t$ and $m_t$
+       \medskip
+       \item Asymetry in $m_t$
+  \end{itemize}
+\end{itemize}
+
+\vspace*{-0.25cm}
+\small
+\begin{table}[ht!]
+  \centering
+  \begin{threeparttable}
+  %\caption*{\textbf{Estimated Coefficients of Markov-Switching and Quantile Regression Models}}\label{tab:MS-QR}
+    \begin{tabular}{p{0.5cm} p{1.cm} p{1.8cm} p{1.cm} p{1.8cm} p{1.cm} p{1.8cm} }
+      \midrule
+      & \multicolumn{6}{c}{\textbf{Quantile Regression}} \\
+          \cline{2-7}
+     & \multicolumn{2}{c}{\textbf{\textit{25th Quantile}}} & \multicolumn{2}{c}{\textbf{\textit{Median}}} & \multicolumn{2}{c}{\textbf{\textit{75th Quantile}}} \\
+     \midrule
+     $\alpha_{\tau}$ & -0.99  & [-1.11,-0.86] & \h0.20  & [\h0.11,\h0.29] &  \h1.02 & [\h0.96,\h1.08]\\
+$\beta_{\tau}$  & -0.60  & [-0.71,-0.48]  & -0.29  & [-0.37,-0.21] & -0.09 & [-0.14,-0.04] \\
+$\gamma_{\tau}$  & \h0.68  & [\h0.42,\h0.94] & \h0.38  & [\h0.21,\h0.55] &  \h0.33 & [\h0.20,\h0.46] \\
+    \midrule
+    \midrule
+    \end{tabular}%
+    \end{threeparttable}
+  \label{tab:MS_QR_coeff}%
+\end{table}%
+\normalsize
+\hyperlink{main:qrmodel}{\beamerbutton{Back}}
+\end{frame}
+
+%-----------------------------------------------------------------
+
+
+\begin{frame}{Example of downside and upside risk in MS model}
+
+\begin{figure}
+    \includegraphics[width=0.85\linewidth,keepaspectratio=true]{FiguresPhillyFed/SVAR_StateDependent_2Regimes_KernelDensity_2008_2018.pdf}
+\end{figure}
+
+\end{frame}
+
+
+
+\end{document}

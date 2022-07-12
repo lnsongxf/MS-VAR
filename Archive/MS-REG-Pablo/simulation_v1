@@ -1,0 +1,78 @@
+%% Markov-Switching Real-Time Growth-at-Risk
+% Model with f_t and m_t endogenous
+% Author: Francesca Loria
+% This Version: June 2020
+
+%% housekeeping
+clear; close all; clc;
+
+% Important paths
+addpath('/if/prod-tfs/production/GAR/MS-VAR/RISE_toolbox');
+addpath(genpath('scripts'));
+addpath(genpath('cbrewer'));
+
+% Options
+saveit    = 1; % 1 = save graphs
+save_mcmc = 1; % 1 = save posterior sampling results
+const     = 1; % 1= have a constant in transition probability
+normal    = 0; % 1 = use normal distribution, 0 = gamma distribution
+
+% Data vintage, sample and country selection
+datafilename = 'MacroRisk_November30.xlsx';
+sheetuse     = 'DFM_73_Monthly';
+start_date   = '1973-Jan';
+end_date     = '2020-Oct';
+ctry         = 'US';
+
+
+% VAR configuration 
+nlags=1;
+exog={};
+constant=true;
+panel=[];
+
+% Create date formats for plotting
+inputformat = 'yyyy-MMM';
+dataformat  = 'yyyy-mmm';
+start_plot    = '1973-Feb';
+end_plot      = '2019-Oct';
+end_plot_full = '2020-Oct';
+
+% Vector of dates for the full sample
+dates_full = datenum((datetime(start_date,'InputFormat',inputformat))+calmonths(nlags):calmonths(1):(datetime(end_date,'InputFormat',inputformat)))';
+
+% Index of dates
+sd      = find(datenum(start_plot,dataformat)==dates_full);
+ed      = find(datenum(end_plot,dataformat)==dates_full);
+ed_full = find(datenum(end_plot_full,dataformat)==dates_full);
+
+% Vector of dates for plotting
+dates   = dates_full(sd:ed);
+
+% Figure options
+FontSize = 16;
+numticks = 48;
+figSize = [12 6];
+linestyle = {'-','--',':'};
+colors = cbrewer('div', 'RdYlBu', 64);
+colors2 = cbrewer('qual', 'Set1', 8);
+left_color = [0 0 0];
+right_color = colors(2,:);
+
+%% Load RISE
+rise_startup()
+
+%% Prepare Data
+
+%load data
+[db, db_full,startdb,enddb,tex] = data(datafilename,sheetuse,start_date,end_date,ctry);
+
+% Collect MF, FF and trend (estimation sample)
+FF = db.FF.data(nlags+1:end);
+MF = db.MF.data(nlags+1:end);
+TR = db.TRENDH.data(nlags+1:end);
+
+% Collect MF, FF and trend (full sample)
+FF_full = db_full.FF.data(nlags+1:end);
+MF_full = db_full.MF.data(nlags+1:end);
+TR_full = db_full.TRENDH.data(nlags+1:end);

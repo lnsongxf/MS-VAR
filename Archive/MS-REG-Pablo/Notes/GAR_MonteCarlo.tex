@@ -1,0 +1,234 @@
+%% LyX 2.3.5.2 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{amsmath}
+\usepackage{babel}
+\usepackage[margin=1.0in]{geometry}
+\begin{document}
+
+\section{Monte Carlo Experiment}
+
+\subsection{Data generating process}
+
+Consider the following structural model:
+
+\begin{align*}
+\left[\begin{array}{ccc}
+1 & a_{12}^{j} & a_{13}^{j}\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{array}\right]\left[\begin{array}{c}
+y_{t+1}\\
+f_{t+1}\\
+m_{t+1}
+\end{array}\right]= & \left[\begin{array}{c}
+\mu^{j}\\
+0\\
+0
+\end{array}\right]+\left[\begin{array}{ccc}
+b_{11}^{j} & b_{12}^{j} & b_{13}^{j}\\
+0 & b_{22} & 0\\
+0 & 0 & b_{33}
+\end{array}\right]\left[\begin{array}{c}
+y_{t}\\
+f_{t}\\
+m_{t}
+\end{array}\right]+\left[\begin{array}{ccc}
+c_{11}^{j} & 0 & 0\\
+0 & c_{22} & 0\\
+0 & 0 & c_{33}
+\end{array}\right]\left[\begin{array}{c}
+\epsilon_{1,t}\\
+\epsilon_{2,t}\\
+\epsilon_{3,t}
+\end{array}\right]
+\end{align*}
+
+Or in compact notation:
+
+\begin{align*}
+A_{j}X_{t+1}= & C+B_{j}X_{t}+\Omega_{j}^{1/2}\epsilon_{t}
+\end{align*}
+
+Where we have that $j=\{0,1\}$ corresponding to the bad and normal
+regime respectively. Then it is easy to show that:
+
+\begin{align*}
+A_{j}^{-1}= & \left[\begin{array}{ccc}
+1 & -a_{12}^{j} & -a_{13}^{j}\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{array}\right]
+\end{align*}
+
+We can the write the reduced form of the system:
+
+\begin{align*}
+\left[\begin{array}{c}
+y_{t+1}\\
+f_{t+1}\\
+m_{t+1}
+\end{array}\right]= & \left[\begin{array}{c}
+\mu^{j}\\
+0\\
+0
+\end{array}\right]+\left[\begin{array}{ccc}
+1 & -a_{12}^{j} & -a_{13}^{j}\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{array}\right]\left[\begin{array}{ccc}
+b_{11}^{j} & b_{12}^{j} & b_{13}^{j}\\
+0 & b_{22} & 0\\
+0 & 0 & b_{33}
+\end{array}\right]\left[\begin{array}{c}
+y_{t}\\
+f_{t}\\
+m_{t}
+\end{array}\right]+\left[\begin{array}{ccc}
+1 & -a_{12}^{j} & -a_{13}^{j}\\
+0 & 1 & 0\\
+0 & 0 & 1
+\end{array}\right]\left[\begin{array}{ccc}
+c_{11}^{j} & 0 & 0\\
+0 & c_{22} & 0\\
+0 & 0 & c_{33}
+\end{array}\right]\left[\begin{array}{c}
+\epsilon_{1,t}\\
+\epsilon_{2,t}\\
+\epsilon_{3,t}
+\end{array}\right]
+\end{align*}
+
+Simple operations yield
+
+\begin{align*}
+\left[\begin{array}{c}
+y_{t+1}\\
+f_{t+1}\\
+m_{t+1}
+\end{array}\right]= & \left[\begin{array}{c}
+\mu^{j}\\
+0\\
+0
+\end{array}\right]+\left[\begin{array}{ccc}
+b_{11}^{j} & b_{12}^{j}-a_{12}^{j}b_{22} & b_{13}^{j}-a_{13}^{j}b_{33}\\
+0 & b_{22} & 0\\
+0 & 0 & b_{33}
+\end{array}\right]\left[\begin{array}{c}
+y_{t}\\
+f_{t}\\
+m_{t}
+\end{array}\right]+\left[\begin{array}{ccc}
+c_{11}^{j} & -a_{12}^{j}c_{22} & -a_{13}^{j}c_{33}\\
+0 & c_{22} & 0\\
+0 & 0 & c_{33}
+\end{array}\right]\left[\begin{array}{c}
+\epsilon_{1,t}\\
+\epsilon_{2,t}\\
+\epsilon_{3,t}
+\end{array}\right]
+\end{align*}
+
+This representation clearly shows that the shocks to the first equation
+are composites of the structural shocks to the $f_{t}$ and $m_{t}$
+factors. Moreover, by construction we can impose $c_{22}=c_{33}=1$,
+which implies that the financial and macro factors have unit variance.
+Then we can write the reduced form system:
+
+\begin{eqnarray}
+\left[\begin{array}{c}
+y_{t+1}\\
+f_{t+1}\\
+m_{t+1}
+\end{array}\right]= & \left[\begin{array}{c}
+\mu^{j}\\
+0\\
+0
+\end{array}\right] & +\left[\begin{array}{ccc}
+b_{11}^{j} & b_{12}^{j}-a_{12}^{j}b_{22} & b_{13}^{j}-a_{13}^{j}b_{33}\\
+0 & b_{22} & 0\\
+0 & 0 & b_{33}
+\end{array}\right]\left[\begin{array}{c}
+y_{t}\\
+f_{t}\\
+m_{t}
+\end{array}\right]+\left[\begin{array}{c}
+\eta_{1,t}\\
+\eta_{2,t}\\
+\eta_{3,t}
+\end{array}\right]
+\end{eqnarray}
+
+Where $\eta_{t}\sim N(0,A_{j}^{-1}\Omega_{j}A_{j}^{-1'})$ and where
+it is clear the following mapping bettwen reduced form $(\eta)$ and
+structural shocks $(\epsilon)$:
+
+\begin{align*}
+\eta_{1,t}= & c_{11}^{j}\epsilon_{1,t}-a_{12}^{j}\epsilon_{2,t}-a_{13}^{j}\epsilon_{3,t}\\
+\eta_{2.t}= & \epsilon_{2,t}\\
+\eta_{3.t}= & \epsilon_{3,t}
+\end{align*}
+
+
+\subsection{Coefficient restrictions}
+
+Focusing on the first equation of the system we have
+
+\begin{eqnarray*}
+\begin{array}{c}
+y_{t+1}\end{array} & =\begin{array}{c}
+\mu^{j}\end{array}+b_{11}^{j}y_{t}+\left(b_{12}^{j}-a_{12}^{j}b_{22}\right)f_{t}+\left(b_{13}^{j}-a_{13}^{j}b_{33}\right)m_{t}+\eta_{1,t}
+\end{eqnarray*}
+
+If we impose $b_{11}^{j}=0$, we arrive at the one-step-ahead forecasting
+equation we have in the paper:
+
+\begin{eqnarray*}
+\begin{array}{c}
+y_{t+1}\end{array} & =\begin{array}{c}
+\mu^{j}\end{array}+\beta_{j}f_{t}+\gamma_{j}m_{t}+\eta_{1,t}
+\end{eqnarray*}
+
+We restrict attention to the following parameter restrictions to match
+our empirical framework:
+
+\begin{eqnarray*}
+\beta_{j} & <0\\
+\gamma_{j} & >0\\
+\beta_{0} & < & \beta_{1}\\
+\gamma_{0} & > & \gamma_{1}
+\end{eqnarray*}
+
+\section{Alternative DGP}
+
+The issue with the previous DGP is that $m_t$ and $f_t$ are independent from $y_{t}$, hence inference about the regimes is difficult once we try to estimate the model. 
+
+\begin{eqnarray}
+\left[\begin{array}{c}
+y_{t}\\
+f_{t+1}\\
+m_{t+1}
+\end{array}\right]= & \left[\begin{array}{c}
+\mu^{j}\\
+0\\
+0
+\end{array}\right] & +\left[\begin{array}{ccc}
+0 & \beta^j & \gamma^j\\
+0 & b_{22} & b_{23}\\
+0 & b_{32} & b_{33}
+\end{array}\right]\left[\begin{array}{c}
+y_{t-1}\\
+f_{t}\\
+m_{t}
+\end{array}\right]+\left[\begin{array}{c}
+\eta_{1,t}\\
+\eta_{2,t}\\
+\eta_{3,t}
+\end{array}\right]
+\end{eqnarray}
+
+
+
+\end{document}

@@ -1,0 +1,479 @@
+222
+------------------------------------------
+Setting up environment variables
+---
+LD_LIBRARY_PATH is .:/opt/MATLAB/R2017a/runtime/glnxa64:/opt/MATLAB/R2017a/bin/glnxa64:/opt/MATLAB/R2017a/sys/os/glnxa64:/opt/MATLAB/R2017a/sys/opengl/lib/glnxa64
+Warning: Method directories not allowed in MATLAB path: /data/scratch/m1pac03/mcrcache_15792035_222/.mcrCache9.2/OOS_sl0/if/gms_research_gar/GAR/MS-VAR/RISE_toolbox2/classes/models/@dsge/private
+Running on SLURM; using 1 cores as assigned on this node.
+
+Performing iteration ending on 2017M6 of model 11
+Warning: This should be expanded with the country names in case of panel
+> In abstvar/abstvar/check_inputs
+  In abstvar
+  In svar
+  In scriptEstimateMode_FULL (line 79)
+  In run (line 86)
+  In msreg_2reg_endoprob_SVAR_FULL_OOS (line 217)
+  In OOS_slurm_IF (line 2)
+    'c(3,1,sync,1)>=c(3,1,sync,2)'
+    'a0(1,GDPGH,sync,1)=0'
+    'a0(1,MF,sync,1)=0'
+    'a0(2,GDPGH,sync,1)=0'
+    'a0(1,GDPGH,sync,2)=0'
+    'a0(1,MF,sync,2)=0'
+    'a0(2,GDPGH,sync,2)=0'
+    'a1(1,GDPGH)=0'
+    'a1(2,GDPGH)=0'
+    'a1(3,GDPGH)=0'
+    's(3,3,sync,1)<=s(3,3,sync,2)'
+
+ parameter: A12, density:BETA, hyperparameters: [4.3661e-06 3.9294e-05],convergence 3.9293e-06
+ parameter: A21, density:BETA, hyperparameters: [4.3661e-06 3.9294e-05],convergence 3.9293e-06
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+     0          27          7556.71                      4.42e+03
+     1          54          2377.96    0.000226156            604  
+     2          81          2251.01              1            284  
+     3         108          2180.94              1            191  
+     4         135           2124.9              1            133  
+     5         162          2107.85              1            138  
+     6         189          2083.77              1            140  
+     7         216           2050.6              1            194  
+     8         243          2021.19              1            199  
+     9         270          1942.39              1            103  
+    10         297          1919.79              1           66.6  
+    11         324          1916.53              1             67  
+    12         351          1908.69              1           65.1  
+    13         378          1897.65              1            100  
+    14         405          1887.35              1            103  
+    15         432          1877.19              1           84.4  
+    16         459          1867.67              1           76.9  
+    17         486          1855.85              1            107  
+    18         513          1840.62              1            123  
+    19         540          1827.04              1           71.5  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+    20         567          1817.81              1           52.1  
+    21         594          1810.41              1           65.2  
+    22         621          1799.01              1           93.5  
+    23         648          1791.31              1           69.9  
+    24         675          1785.01              1             61  
+    25         702          1780.25              1             39  
+    26         729          1777.53              1           42.9  
+    27         756          1775.58              1           31.2  
+    28         783          1774.36              1           28.1  
+    29         810           1773.3              1           27.3  
+    30         837           1772.2              1           26.5  
+    31         864          1771.18              1           23.6  
+    32         891          1770.49              1           15.8  
+    33         918          1769.97              1           17.7  
+    34         945          1769.45              1           14.6  
+    35         972          1769.06              1           13.7  
+    36         999          1768.85              1           10.2  
+    37        1026          1768.73              1            8.8  
+    38        1053          1768.63              1           7.13  
+    39        1080          1768.55              1           7.52  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+    40        1107           1768.5              1           5.74  
+    41        1134          1768.47              1           4.02  
+    42        1161          1768.43              1           4.47  
+    43        1188           1768.4              1           4.37  
+    44        1215          1768.36              1           5.06  
+    45        1242          1768.32              1           4.84  
+    46        1269          1768.28              1           5.63  
+    47        1296          1768.24              1           5.26  
+    48        1323           1768.2              1           5.37  
+    49        1350          1768.16              1            4.8  
+    50        1377          1768.12              1           4.93  
+    51        1404          1768.08              1           3.74  
+    52        1431          1768.05              1           3.63  
+    53        1458          1768.03              1           3.45  
+    54        1485          1768.01              1           4.89  
+    55        1512          1767.98              1           4.75  
+    56        1539          1767.95              1           3.13  
+    57        1566          1767.93              1           2.33  
+    58        1593          1767.92              1           2.08  
+    59        1620          1767.91              1           2.84  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+    60        1647          1767.89              1           2.66  
+    61        1674          1767.88              1           1.59  
+    62        1701          1767.87              1          0.888  
+    63        1728          1767.87              1          0.843  
+    64        1755          1767.87              1           0.92  
+    65        1782          1767.86              1          0.871  
+    66        1809          1767.86              1           1.61  
+    67        1836          1767.85              1            2.2  
+    68        1863          1767.84              1           1.99  
+    69        1890          1767.84              1           1.48  
+    70        1917          1767.84              1           1.64  
+    71        1944          1767.83              1            1.6  
+    72        1971          1767.83              1           2.32  
+    73        1998          1767.82              1           2.98  
+    74        2025          1767.81              1           2.46  
+    75        2052          1767.81              1           1.02  
+    76        2079          1767.81              1          0.802  
+    77        2106           1767.8              1          0.679  
+    78        2133           1767.8              1          0.982  
+    79        2160           1767.8              1          0.803  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+    80        2187           1767.8              1          0.409  
+    81        2214           1767.8              1          0.402  
+    82        2241           1767.8              1            0.5  
+    83        2268           1767.8              1          0.834  
+    84        2295           1767.8              1          0.939  
+    85        2322           1767.8              1          0.619  
+    86        2349           1767.8              1          0.327  
+    87        2376           1767.8              1          0.337  
+    88        2403           1767.8              1          0.518  
+    89        2430           1767.8              1          0.879  
+    90        2457           1767.8              1           1.15  
+    91        2484          1767.79              1           1.02  
+    92        2511          1767.79              1          0.563  
+    93        2538          1767.79              1          0.184  
+    94        2565          1767.79              1           0.11  
+    95        2592          1767.79              1          0.115  
+    96        2619          1767.79              1          0.149  
+    97        2646          1767.79              1          0.131  
+    98        2673          1767.79              1         0.0678  
+    99        2700          1767.79              1         0.0459  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+   100        2727          1767.79              1         0.0392  
+   101        2754          1767.79              1          0.053  
+   102        2781          1767.79              1         0.0638  
+   103        2808          1767.79              1         0.0454  
+   104        2835          1767.79              1         0.0296  
+   105        2862          1767.79              1          0.027  
+   106        2889          1767.79              1         0.0413  
+   107        2916          1767.79              1         0.0736  
+   108        2943          1767.79              1          0.101  
+   109        2970          1767.79              1          0.108  
+   110        2997          1767.79              1         0.0702  
+   111        3024          1767.79              1         0.0213  
+   112        3051          1767.79              1         0.0118  
+   113        3078          1767.79              1         0.0113  
+   114        3105          1767.79              1        0.00841  
+   115        3132          1767.79              1        0.00597  
+   116        3159          1767.79              1        0.00241  
+   117        3186          1767.79              1       0.000854  
+   118        3213          1767.79              1       0.000397  
+   119        3240          1767.79              1        0.00032  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+   120        3294          1767.79       0.196217       0.000198  
+   121        3375          1767.79       0.113304       0.000366  
+   122        3483          1767.79        0.19743       0.000305  
+   123        3564          1767.79       0.106907       0.000397  
+   124        3645          1767.79      0.0537743        0.00032  
+
+Local minimum possible.
+
+fminunc stopped because it cannot decrease the objective function
+along the current search direction.
+
+
+
+
+Computing finite-difference Hessian using objective function.
+Predicted change in objective function too small.
+Warning: File: /data/scratch/m1pac03/mcrcache_15792035_222/.mcrCache9.2/OOS_sl0/functions/fPredDensityDirectFull.m Line: 97 Column: 26
+The temporary variable st_temp will be cleared at the beginning of each iteration of the parfor loop.
+Any value assigned to it before the loop will be lost.  If st_temp is used before it is assigned in the parfor loop, a runtime error will occur.
+See Parallel for Loops in MATLAB, "Temporary Variables".
+> In msreg_2reg_endoprob_SVAR_FULL_OOS (line 317)
+  In OOS_slurm_IF (line 2)
+Starting parallel pool (parpool) using the 'local' profile ...
+connected to 1 workers.
+Current draw: 3000 of 5000
+Current draw: 2000 of 5000
+Current draw: 1000 of 5000
+Current draw: 5000 of 5000
+Current draw: 4000 of 5000
+Elapsed time is 312.971969 seconds.
+Ran Forecast Type 1for Model 11 and Horizon 12
+Performing iteration ending on 2017M6 of model 11
+Warning: This should be expanded with the country names in case of panel
+> In abstvar/abstvar/check_inputs
+  In abstvar
+  In svar
+  In scriptEstimateMode_FULL (line 79)
+  In run (line 86)
+  In msreg_2reg_endoprob_SVAR_FULL_OOS (line 217)
+  In OOS_slurm_IF (line 2)
+    'c(3,1,sync,1)>=c(3,1,sync,2)'
+    'a0(1,GDPG,sync,1)=0'
+    'a0(2,GDPG,sync,1)=0'
+    'a0(1,MF,sync,1)=0'
+    'a0(1,GDPG,sync,2)=0'
+    'a0(2,GDPG,sync,2)=0'
+    'a0(1,MF,sync,2)=0'
+    'a1(3,GDPG)=0'
+    's(3,3,sync,1)<=s(3,3,sync,2)'
+
+ parameter: A12, density:BETA, hyperparameters: [4.3661e-06 3.9294e-05],convergence 3.9293e-06
+ parameter: A21, density:BETA, hyperparameters: [4.3661e-06 3.9294e-05],convergence 3.9293e-06
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+     0          29          15062.4                      1.19e+04
+     1          58           4091.5    8.38405e-05       3.59e+03  
+     2          87          3080.05              1       2.24e+03  
+     3         116          2737.19              1            847  
+     4         145          2473.87              1            399  
+     5         174          2383.16              1            264  
+     6         203          2354.09              1            139  
+     7         232          2340.16              1            179  
+     8         261          2321.28              1            192  
+     9         290           2292.1              1            202  
+    10         319          2260.37              1            219  
+    11         348          2245.57              1            193  
+    12         377          2235.49              1            120  
+    13         406          2223.71              1            207  
+    14         435          2214.57              1            193  
+    15         464          2196.81              1            251  
+    16         493          2183.46              1            216  
+    17         522          2169.94              1            239  
+    18         551          2162.58              1            168  
+    19         580          2159.24              1           52.8  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+    20         609           2156.9              1           61.5  
+    21         638          2152.82              1            186  
+    22         667           2148.1              1            234  
+    23         696          2142.63              1            170  
+    24         725          2138.44              1            103  
+    25         754          2134.15              1            148  
+    26         783          2127.65              1            309  
+    27         812          2118.85              1            331  
+    28         841          2111.79              1            208  
+    29         870          2108.24              1           63.8  
+    30         899          2105.96              1            107  
+    31         928          2101.08              1            267  
+    32         957          2092.92              1            392  
+    33         986          2082.84              1            376  
+    34        1015          2076.29              1            196  
+    35        1044          2073.94              1           46.6  
+    36        1073          2073.09              1             49  
+    37        1102          2071.84              1            112  
+    38        1131          2070.02              1            145  
+    39        1160          2068.12              1            113  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+    40        1189          2066.89              1           43.1  
+    41        1218          2066.05              1           45.7  
+    42        1247          2064.94              1           91.9  
+    43        1276          2063.25              1            133  
+    44        1305          2061.41              1            114  
+    45        1334          2060.06              1           43.9  
+    46        1363          2059.02              1           42.8  
+    47        1392          2057.51              1            107  
+    48        1421          2054.42              1            197  
+    49        1450          2049.17              1            254  
+    50        1479          2043.65              1            210  
+    51        1508          2040.57              1           96.8  
+    52        1537          2039.62              1           27.4  
+    53        1566          2039.28              1           30.6  
+    54        1595          2038.86              1           61.3  
+    55        1624          2037.82              1            102  
+    56        1653          2036.25              1            118  
+    57        1682          2034.75              1           78.7  
+    58        1711          2034.05              1           25.9  
+    59        1740          2033.77              1           25.9  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+    60        1769          2033.48              1           40.9  
+    61        1798          2032.94              1             66  
+    62        1827          2032.22              1           70.4  
+    63        1856          2031.63              1           39.2  
+    64        1885          2031.44              1           7.22  
+    65        1914          2031.41              1           7.03  
+    66        1943          2031.36              1           9.14  
+    67        1972          2031.26              1           15.3  
+    68        2001          2031.08              1           18.6  
+    69        2030          2030.89              1           14.7  
+    70        2059          2030.78              1           7.42  
+    71        2088          2030.74              1           5.63  
+    72        2117          2030.73              1           4.92  
+    73        2146           2030.7              1           4.69  
+    74        2175          2030.66              1           4.27  
+    75        2204          2030.61              1           4.99  
+    76        2233          2030.58              1           5.57  
+    77        2262          2030.57              1           5.05  
+    78        2291          2030.56              1           4.27  
+    79        2320          2030.53              1           3.74  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+    80        2349          2030.47              1           6.03  
+    81        2378          2030.39              1           7.07  
+    82        2407          2030.31              1           5.08  
+    83        2436          2030.28              1           5.17  
+    84        2465          2030.26              1           5.19  
+    85        2494          2030.24              1           4.97  
+    86        2523          2030.21              1           4.92  
+    87        2552          2030.14              1            8.1  
+    88        2581          2030.05              1           9.21  
+    89        2610          2029.98              1           5.83  
+    90        2639          2029.96              1           2.46  
+    91        2668          2029.95              1           2.35  
+    92        2697          2029.95              1           2.31  
+    93        2726          2029.93              1           4.85  
+    94        2755          2029.89              1           8.51  
+    95        2784          2029.81              1           11.4  
+    96        2813          2029.73              1             10  
+    97        2842          2029.69              1           4.58  
+    98        2871          2029.68              1           2.81  
+    99        2900          2029.67              1           2.68  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+   100        2929          2029.67              1           2.45  
+   101        2958          2029.65              1           4.36  
+   102        2987          2029.63              1           5.57  
+   103        3016          2029.61              1           4.39  
+   104        3045           2029.6              1           2.22  
+   105        3074           2029.6              1           2.24  
+   106        3103           2029.6              1            2.2  
+   107        3132          2029.59              1           2.24  
+   108        3161          2029.59              1           3.58  
+   109        3190          2029.57              1           4.29  
+   110        3219          2029.56              1           3.14  
+   111        3248          2029.56              1           1.03  
+   112        3277          2029.55              1          0.821  
+   113        3306          2029.55              1          0.815  
+   114        3335          2029.55              1          0.801  
+   115        3364          2029.55              1           1.38  
+   116        3393          2029.55              1           1.99  
+   117        3422          2029.54              1            2.1  
+   118        3451          2029.54              1           1.27  
+   119        3480          2029.54              1          0.646  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+   120        3509          2029.53              1          0.703  
+   121        3538          2029.53              1          0.746  
+   122        3567          2029.53              1          0.859  
+   123        3596          2029.53              1           1.47  
+   124        3625          2029.52              1           2.26  
+   125        3654          2029.51              1           2.88  
+   126        3683          2029.49              1           2.55  
+   127        3712          2029.48              1            1.2  
+   128        3741          2029.48              1          0.999  
+   129        3770          2029.48              1          0.946  
+   130        3799          2029.48              1          0.902  
+   131        3828          2029.48              1          0.804  
+   132        3857          2029.48              1          0.675  
+   133        3886          2029.47              1          0.896  
+   134        3915          2029.47              1          0.953  
+   135        3944          2029.47              1          0.599  
+   136        3973          2029.47              1          0.299  
+   137        4002          2029.46              1          0.218  
+   138        4031          2029.46              1          0.222  
+   139        4060          2029.46              1          0.223  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+   140        4089          2029.46              1          0.217  
+   141        4118          2029.46              1          0.234  
+   142        4147          2029.46              1          0.258  
+   143        4176          2029.46              1          0.243  
+   144        4205          2029.46              1            0.2  
+   145        4234          2029.46              1          0.237  
+   146        4263          2029.46              1          0.229  
+   147        4292          2029.46              1          0.221  
+   148        4321          2029.46              1          0.202  
+   149        4350          2029.46              1           0.21  
+   150        4379          2029.46              1          0.212  
+   151        4408          2029.46              1          0.262  
+   152        4437          2029.46              1          0.295  
+   153        4466          2029.46              1          0.188  
+   154        4495          2029.46              1          0.051  
+   155        4524          2029.46              1         0.0349  
+   156        4553          2029.46              1         0.0348  
+   157        4582          2029.46              1         0.0353  
+   158        4611          2029.46              1         0.0351  
+   159        4640          2029.46              1          0.035  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+   160        4669          2029.46              1         0.0343  
+   161        4698          2029.46              1         0.0327  
+   162        4727          2029.46              1         0.0286  
+   163        4756          2029.46              1         0.0221  
+   164        4785          2029.46              1         0.0247  
+   165        4814          2029.46              1         0.0213  
+   166        4843          2029.46              1         0.0198  
+   167        4872          2029.46              1         0.0191  
+   168        4901          2029.46              1         0.0186  
+   169        4930          2029.46              1         0.0166  
+   170        4959          2029.46              1         0.0141  
+   171        4988          2029.46              1         0.0119  
+   172        5017          2029.46              1         0.0178  
+   173        5046          2029.46              1         0.0187  
+   174        5075          2029.46              1        0.00996  
+   175        5104          2029.46              1        0.00282  
+   176        5133          2029.46              1       0.000619  
+   177        5162          2029.46              1       0.000423  
+   178        5191          2029.46              1        0.00032  
+   179        5220          2029.46              1       0.000244  
+                                                        First-order 
+ Iteration  Func-count       f(x)        Step-size       optimality
+   180        5249          2029.46              1       0.000305  
+   181        5481          2029.46     0.00296553       0.000397  
+
+Local minimum possible.
+
+fminunc stopped because it cannot decrease the objective function
+along the current search direction.
+
+
+
+
+Computing finite-difference Hessian using objective function.
+Predicted change in objective function too small.
+Warning: File: /data/scratch/m1pac03/mcrcache_15792035_222/.mcrCache9.2/OOS_sl0/functions/fPredDensityIteratedFull.m Line: 115 Column: 83
+The temporary variable f_t_comp will be cleared at the beginning of each iteration of the parfor loop.
+Any value assigned to it before the loop will be lost.  If f_t_comp is used before it is assigned in the parfor loop, a runtime error will occur.
+See Parallel for Loops in MATLAB, "Temporary Variables".
+> In msreg_2reg_endoprob_SVAR_FULL_OOS (line 320)
+  In OOS_slurm_IF (line 2)
+Warning: File: /data/scratch/m1pac03/mcrcache_15792035_222/.mcrCache9.2/OOS_sl0/functions/fPredDensityIteratedFull.m Line: 115 Column: 92
+The temporary variable m_t_comp will be cleared at the beginning of each iteration of the parfor loop.
+Any value assigned to it before the loop will be lost.  If m_t_comp is used before it is assigned in the parfor loop, a runtime error will occur.
+See Parallel for Loops in MATLAB, "Temporary Variables".
+> In msreg_2reg_endoprob_SVAR_FULL_OOS (line 320)
+  In OOS_slurm_IF (line 2)
+Warning: File: /data/scratch/m1pac03/mcrcache_15792035_222/.mcrCache9.2/OOS_sl0/functions/fPredDensityIteratedFull.m Line: 115 Column: 101
+The temporary variable gdp_t_comp will be cleared at the beginning of each iteration of the parfor loop.
+Any value assigned to it before the loop will be lost.  If gdp_t_comp is used before it is assigned in the parfor loop, a runtime error will occur.
+See Parallel for Loops in MATLAB, "Temporary Variables".
+> In msreg_2reg_endoprob_SVAR_FULL_OOS (line 320)
+  In OOS_slurm_IF (line 2)
+Warning: File: /data/scratch/m1pac03/mcrcache_15792035_222/.mcrCache9.2/OOS_sl0/functions/fPredDensityIteratedFull.m Line: 113 Column: 66
+The temporary variable st_sim will be cleared at the beginning of each iteration of the parfor loop.
+Any value assigned to it before the loop will be lost.  If st_sim is used before it is assigned in the parfor loop, a runtime error will occur.
+See Parallel for Loops in MATLAB, "Temporary Variables".
+> In msreg_2reg_endoprob_SVAR_FULL_OOS (line 320)
+  In OOS_slurm_IF (line 2)
+Warning: File: /data/scratch/m1pac03/mcrcache_15792035_222/.mcrCache9.2/OOS_sl0/functions/fPredDensityIteratedFull.m Line: 107 Column: 49
+The temporary variable p11 will be cleared at the beginning of each iteration of the parfor loop.
+Any value assigned to it before the loop will be lost.  If p11 is used before it is assigned in the parfor loop, a runtime error will occur.
+See Parallel for Loops in MATLAB, "Temporary Variables".
+> In msreg_2reg_endoprob_SVAR_FULL_OOS (line 320)
+  In OOS_slurm_IF (line 2)
+Warning: File: /data/scratch/m1pac03/mcrcache_15792035_222/.mcrCache9.2/OOS_sl0/functions/fPredDensityIteratedFull.m Line: 107 Column: 53
+The temporary variable p22 will be cleared at the beginning of each iteration of the parfor loop.
+Any value assigned to it before the loop will be lost.  If p22 is used before it is assigned in the parfor loop, a runtime error will occur.
+See Parallel for Loops in MATLAB, "Temporary Variables".
+> In msreg_2reg_endoprob_SVAR_FULL_OOS (line 320)
+  In OOS_slurm_IF (line 2)
+Warning: File: /data/scratch/m1pac03/mcrcache_15792035_222/.mcrCache9.2/OOS_sl0/functions/fPredDensityIteratedFull.m Line: 107 Column: 42
+The temporary variable st_lag will be cleared at the beginning of each iteration of the parfor loop.
+Any value assigned to it before the loop will be lost.  If st_lag is used before it is assigned in the parfor loop, a runtime error will occur.
+See Parallel for Loops in MATLAB, "Temporary Variables".
+> In msreg_2reg_endoprob_SVAR_FULL_OOS (line 320)
+  In OOS_slurm_IF (line 2)
+Current draw: 5000 of 5000
+Current draw: 4000 of 5000
+Current draw: 3000 of 5000
+Current draw: 2000 of 5000
+Current draw: 1000 of 5000
+Elapsed time is 850.612801 seconds.
+Ran Forecast Type 2for Model 11 and Horizon 12

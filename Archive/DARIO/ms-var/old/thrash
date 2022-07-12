@@ -1,0 +1,82 @@
+load('results/Params/mode/Simul/Iterated/quantiles_iterated_test.mat');
+quantiles_iterated_test = quantiles_iterated;
+quantiles_iterated = quantiles;
+
+
+    fig6=figure('Units','normalized','Position', [0,0,1.2,0.9]); clf;
+    hold on
+    l1=plot(dates_full(sd:ed), quantiles_iterated.dYsim_10(sd:ed),'-','Color',colors(10,:),'LineWidth', 2,'DisplayName','10th (iterated)');
+    l2=plot(dates_full(sd:ed), quantiles_iterated.dYsim_90(sd:ed),'-','Color',colors(50,:),'LineWidth', 2,'DisplayName','90th (iterated)');
+    l3=plot(dates_full(sd:ed), quantiles_iterated_test.dYsim_10(sd:ed),'-.','Color',colors(10,:),'LineWidth', 2,'DisplayName','10th (iterated)');
+    l4=plot(dates_full(sd:ed), quantiles_iterated_test.dYsim_90(sd:ed),'-.','Color',colors(50,:),'LineWidth', 2,'DisplayName','90th (iterated)');
+    legend([l1 l2 l3 l4],'Orientation','Vertical','Location','Best','interpreter','Latex');legend boxoff;
+    set(gca,'children',flipud(get(gca,'children')))
+    hold off
+    ylabel('Percent','interpreter','Latex','fontsize',10)
+        title('Quantiles Iterated and Iterated test','Interpreter','Latex','FontSize',16);
+
+    axis tight
+    datetick('x','yyyy','keepticks')
+    set(gca, 'XLim', [dates_full(sd), dates_full(ed)])
+   
+    
+    
+    
+    
+    
+    
+    
+    
+    
+load('results/Params/mode/Simul/Direct/quantiles_direct_test.mat');
+quantiles_direct_test = quantiles_direct;
+quantiles_direct = quantiles;
+
+
+    fig6=figure('Units','normalized','Position', [0,0,1.2,0.9]); clf;
+    hold on
+    l1=plot(dates_full(sd:ed), quantiles_direct.dYsim_10(sd:ed),'-','Color',colors(10,:),'LineWidth', 2,'DisplayName','10th (direct)');
+    l2=plot(dates_full(sd:ed), quantiles_direct.dYsim_90(sd:ed),'-','Color',colors(50,:),'LineWidth', 2,'DisplayName','90th (direct)');
+    l3=plot(dates_full(sd:ed), quantiles_direct_test.dYsim_10(sd:ed),'-.','Color',colors(10,:),'LineWidth', 2,'DisplayName','10th (iterated)');
+    l4=plot(dates_full(sd:ed), quantiles_direct_test.dYsim_90(sd:ed),'-.','Color',colors(50,:),'LineWidth', 2,'DisplayName','90th (iterated)');
+    legend([l1 l2 l3 l4],'Orientation','Vertical','Location','Best','interpreter','Latex');legend boxoff;
+    set(gca,'children',flipud(get(gca,'children')))
+    hold off
+    ylabel('Percent','interpreter','Latex','fontsize',10)
+        title('Quantiles Direct and Direct test','Interpreter','Latex','FontSize',16);
+
+    axis tight
+    datetick('x','yyyy','keepticks')
+    set(gca, 'XLim', [dates_full(sd), dates_full(ed)])
+    
+    
+    
+    
+    
+    
+    
+    
+
+    if exist('results/Params/mode/Simul/Direct/quantiles_direct_test.mat','file')==2 && exist('results/Params/mode/Simul/Iterated/quantiles_iterated_test.mat','file')==2
+        load('results/Params/mode/Simul/Direct/quantiles_direct_test.mat');
+        load('results/Params/mode/Simul/Iterated/quantiles_iterated_test.mat');
+        
+
+    fig6=figure('Units','normalized','Position', [0,0,1.2,0.9]); clf;
+    hold on
+    l1=plot(dates_full(sd:ed), quantiles_direct.dYsim_10(sd:ed),'-','Color',colors(10,:),'LineWidth', 2,'DisplayName','10th (direct)');
+    l2=plot(dates_full(sd:ed), quantiles_direct.dYsim_90(sd:ed),'-','Color',colors(50,:),'LineWidth', 2,'DisplayName','90th (direct)');
+    l3=plot(dates_full(sd:ed), quantiles_iterated.dYsim_10(sd:ed),'-.','Color',colors(10,:),'LineWidth', 2,'DisplayName','10th (iterated)');
+    l4=plot(dates_full(sd:ed), quantiles_iterated.dYsim_90(sd:ed),'-.','Color',colors(50,:),'LineWidth', 2,'DisplayName','90th (iterated)');
+    legend([l1 l2 l3 l4],'Orientation','Vertical','Location','Best','interpreter','Latex');legend boxoff;
+    set(gca,'children',flipud(get(gca,'children')))
+    hold off
+    ylabel('Percent','interpreter','Latex','fontsize',10)
+        title('Quantiles Direct test and Iterated test','Interpreter','Latex','FontSize',16);
+
+    axis tight
+    datetick('x','yyyy','keepticks')
+    set(gca, 'XLim', [dates_full(sd), dates_full(ed)])
+    fprintf('\n Correlation 10th quantile: %g',round(corr(quantiles_direct.dYsim_10,quantiles_iterated.dYsim_10),2));
+    fprintf('\n Correlation 90th quantile: %g \n',round(corr(quantiles_direct.dYsim_90,quantiles_iterated.dYsim_90),2));
+    end

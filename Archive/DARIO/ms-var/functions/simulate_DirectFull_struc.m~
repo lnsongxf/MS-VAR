@@ -1,0 +1,61 @@
+% simulate_DirectFull.m 
+%
+% Simulates the measurement equation for the GDP equation conditional on a
+% path for m(t), f(t), s(t) and shocks eps(t). 
+%
+% y(t) = c(s(t)) + alpha(s(t))*m(t) + beta*(s(t))*f(t) + gamma(s(t))*eps(t)
+%--------------------------------------------------------------------------
+
+function [y_out,y_out_1,y_out_2] = simulate_DirectFull_struc(st,f_temp,m_temp,gdp_temp,f_temp_lag,m_temp_lag,gdp_temp_lag,param)
+
+% Number of periods
+nsim = length(st);
+
+% GDP shock
+eta2 = randn(3,nsim); 
+
+% Store GDP simulations
+Ynext   = NaN(3,nsim);
+
+%% Collect reduced-form matrices
+C_sync_1 = param.C_sync_1;
+C_sync_2 = param.C_sync_2;
+A0_sync_1 = param.A0_sync_1\eye(size(param.A0_sync_1,2));
+A0_sync_2 = param.A0_sync_2\eye(size(param.A0_sync_2,2));
+A1_sync_1 = param.A1_sync_1;
+A1_sync_2 = param.A1_sync_2;
+SIG_sync_1 = param.SIG_sync_1;
+SIG_sync_2 = param.SIG_sync_2;
+
+Ymat = [f_temp;m_temp;gdp_temp];
+Ymat_lag = [f_temp_lag;m_temp_lag;gdp_temp_lag];
+
+% Ynext_1 = [Ymat(1:2,:); NaN]; Ynext_2 = [Ymat(1:2,:); NaN];
+% 
+% Ynext_1(end) = C_sync_1(end,:) + A0_sync_1(end,:)*Ymat +A1_sync_1(end,:)*Ymat_lag + SIG_sync_1(end,:)*eta2;
+% Ynext_2(end) = C_sync_2(end,:) + A0_sync_2(end,:)*Ymat +A1_sync_2(end,:)*Ymat_lag + SIG_sync_2(end,:)*eta2;
+
+
+Ynext_1 = C_sync_1(end,:) + A0_sync_1(end,:)*Ymat +A1_sync_1(end,:)*Ymat_lag + SIG_sync_1(end,:)*eta2;
+Ynext_2 = C_sync_2(end,:) + A0_sync_2(end,:)*Ymat +A1_sync_2(end,:)*Ymat_lag + SIG_sync_2(end,:)*eta2;
+
+Ynext_1 = C_sync_1 + A0_sync_1*Ytemp_1 +A1_sync_1*Ymat + SIG_sync_1*eta2;
+Ynext_2 = C_sync_2 + A0_sync_2*Ytemp_2 +A1_sync_2*Ymat + SIG_sync_2*eta2;
+
+y_out_1 = Ynext_1(end,:);
+y_out_2 = Ynext_2(end,:);
+
+% Simulate GDP based on simulated path for st and factors m(tt) and f(tt)
+for tt=1:nsim 
+    
+    if st(tt)==2
+        % Bad regime
+        Ynext(:,tt) = Ynext_2(:,tt);
+    else
+        % Good regime
+        Ynext(:,tt) = Ynext_1(:,tt);
+    end
+        
+end
+
+y_out = Ynext(end,:);

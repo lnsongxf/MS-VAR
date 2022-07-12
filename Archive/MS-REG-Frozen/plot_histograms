@@ -1,0 +1,28 @@
+figure; clf;
+    subplot(2,1,1)
+    hold on
+    l1=histogram(s_3_3_sync_1(correct,:),100,'EdgeColor',colors(60,:),'FaceColor',colors(60,:),'DisplayName','S.d. regime 1');
+    l2=histogram(s_3_3_sync_2(correct,:),100,'EdgeColor',colors(25,:),'FaceColor',colors(25,:),'DisplayName','S.d. regime 2');
+    xline(dgp.s_3_3_sync_1,'Color',colors(60,:),'DisplayName','DGP regime 1');
+    xline(dgp.s_3_3_sync_2,'Color',colors(25,:),'DisplayName','DGP regime 1');
+    legend([l1 l2],'Orientation','Vertical','Location','Best','interpreter','Latex');legend boxoff;
+    set(gca,'children',flipud(get(gca,'children')))
+    hold off
+    axis tight
+    subplot(2,1,2)
+    hold on
+    l1=histogram(c_3_1_sync_1(correct,:),100,'EdgeColor',colors(60,:),'FaceColor',colors(60,:),'DisplayName','Constant regime 1');
+    l2=histogram(c_3_1_sync_2(correct,:),100,'EdgeColor',colors(25,:),'FaceColor',colors(25,:),'DisplayName','Constant regime 2');
+    legend([l1 l2],'Orientation','Vertical','Location','Best','interpreter','Latex');legend boxoff;
+    set(gca,'children',flipud(get(gca,'children')))
+    hold off
+    axis tight
+    tightfig;
+        title('Estimated and GDP Regime Coeficients','FontSize',16','Interpreter','Latex');    
+    
+    
+    
+    
+    
+    
+
