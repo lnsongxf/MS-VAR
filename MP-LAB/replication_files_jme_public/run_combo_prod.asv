@@ -1,0 +1,712 @@
+%% --------------------- constant-parameter model --------------------- %%
+
+%% Housekeeping
+clear; clc; tic;
+close all;
+
+% RISE Toolbox
+addpath('/if/gms_research_gar/GAR/MS-VAR/RISE_toolbox');
+addpath('/if/gms_research_gar/GAR/MS-VAR/RISE_toolbox');
+
+% Load RISE
+rise_startup()
+
+plotfigures = 1;
+savefigures = 0;
+bands = [50 16 84]; % Coverage bands
+
+%% Opts
+opt.mp_restriction = 3;      % 1 = restrictions of as in Arias et al. (2019), 2 = coeffs fixed at their estimations, 3 = no restrictions
+opt.paramsUse      = 'mcmc'; % mode = posterior mode, mcmc = parameter uncertainty
+opt.force_estimate = 0;      % 1 = force to reestimate model
+
+%% Create dataset
+
+[db,varlist0]=createData;
+varlist=fieldnames(varlist0);
+
+%% Create the VAR
+
+clc
+% from JME code:
+% nlag = 12; % number of lags
+% nex  = 0;  % set equal to 1 if a constant is included; 0 otherwise
+nlags=12;
+exog={};
+constant=false;
+sv0=svar(varlist,exog,nlags,constant);
+
+%% set up restrictions
+
+% syntax is alag(eqtn,vname)
+%-------------------------------
+if opt.mp_restriction ==1
+    lin_restr={
+        % Restriction 1
+        % systematic component of MP
+        'a0(6,TR)=0'
+        'a0(6,NBR)=0'
+        };
+    nonlin_restr={
+        % Restriction 2
+        % systematic component of MP
+        'a0(6,GDP)<0' % Negative, as it is on the LHS
+        'a0(6,PGDP)<0' % Negative, as it is on the LHS
+        };
+elseif opt.mp_restriction ==2
+    lin_restr={
+        % Restriction 1
+        % systematic component of MP
+        'a0(6,TR)=0'
+        'a0(6,NBR)=0'
+        's(6,6)=1/1.06'
+        'a0(6,GDP)=-0.85' % Negative, as it is on the RHS
+        'a0(6,PGDP)=-2.33' % Negative, as it is on the RHS
+        %         'a0(6,GDP)=-0.89' % Negative, as it is on the RHS
+        %         'a0(6,PGDP)=-2.48' % Negative, as it is on the RHS
+        };
+    nonlin_restr={
+        %         'a0(6,GDP)>s(6,6)' % Negative, as it is on the RHS
+        %         'a0(6,PGDP)>s(6,6)' % Negative, as it is on the RHS
+        };
+elseif opt.mp_restriction ==3
+    lin_restr={
+        };
+    nonlin_restr={
+    };
+
+
+    % Arias etal. (2019) setup:
+    % s(6,FFR)*FFR_t + a0(6,GDP)*GDP_t + a0(6,PGDP)*PGDP_t  = e_t
+    % 1*FFR_t = - s(6,FFR)^(-1)*a0(6,GDP)*GDP_t - s(6,FFR)^(-1)*a0(6,PGDP)*PGDP_t  + s(6,FFR)^(-1)*e_t
+
+    % RISE setup:
+    % 1*FFR_t + a0(6,GDP)*GDP_t + a0(6,PGDP)*PGDP_t  = s(6,FFR)* e_t
+    % 1*FFR_t = - a0(6,GDP)*GDP_t - a0(6,PGDP)*PGDP_t  + s(6,FFR)* e_t
+end
+
+restrictions=[lin_restr;nonlin_restr];
+
+%% set priors
+
+var_prior=svar.prior_template();
+var_prior.type='sz';
+%--------------------------------
+% Sims and Zha (1998) opt.normal-Wishart Prior Hyperparameters
+% L1 : Overall tightness
+% L2 : Cross-variable specific variance parameter
+% L3 : Speed at which lags greater than 1 converge to zero
+% L4 : tightness on deterministic/exogenous terms
+% L5 : covariance dummies(omega)
+% L6 : co-persistence (lambda)
+% L7 : Own-persistence (mu)
+var_prior.type='sz';
+var_prior.L1=5;
+var_prior.L5=1;
+var_prior.L6=0; % cointegration (10)
+var_prior.L7=0; % unit root  (10)
+prior=struct('var',var_prior);
+
+%% Find posterior mode
+clc
+sv=sv0;
+startdb = '1965M1';
+enddb   = '2007M6';
+if strcmp(opt.paramsUse,'mode')
+    if exist(['sPMode' num2str(opt.mp_restriction) '.mat'],'file')==0 || opt.force_estimate==1
+        sv=estimate(sv,db,{startdb,enddb},prior,restrictions);
+        % sv=estimate(sv,db,{startdb,enddb},prior,restrictions,'fmincon');
+
+        % Structure to store posterior mode results
+        sPMode.prior        = prior;
+        sPMode.restrictions = restrictions;
+        sPMode.startdb      = startdb;
+        sPMode.enddb        = enddb;
+        sPMode.sv           = sv;
+        sPMode.nlags        = nlags;
+        sPMode.exog         = exog;
+        sPMode.constant     = constant;
+
+        % Store solution structure
+        save(['sPMode' num2str(opt.mp_restriction) '.mat'],'sPMode');
+    else
+        load(['sPMode' num2str(opt.mp_restriction) '.mat']);
+        sv = sPMode.sv;
+    end
+else
+    %%%%%%%%
+    % MCMC %
+    %%%%%%%%
+
+    % Load or estimate mcmc
+    if exist(['sPMCMC' num2str(opt.mp_restriction) '.mat'],'file')==0 || opt.force_estimate==1
+        % Estimate posterior distribution
+        run scriptEstimateMCMC_prod.m
+
+        % Store solution structure
+        save(['sPMCMC' num2str(opt.mp_restriction) '.mat'],'sPmcmc')
+
+    else
+
+        % Load stored results
+        load(['sPMCMC' num2str(opt.mp_restriction) '.mat']);
+
+        % Map objects:
+        sv = sPmcmc.sv;
+        pmcmc = sPmcmc.params;
+        results = sPmcmc.results;
+        [ff,lb,ub,x0,vcov,self]=pull_objective(sv);
+
+        % Collect Posterior Estimates and Confidence Bands
+        pmode=posterior_mode(sv);
+
+        pnames=fieldnames(pmode);
+
+        a2tilde_to_a=sv.estim_.linres.a2tilde_to_a;
+
+        params=[results.pop.x];
+
+        params_M = prctile(params,50,2);
+        params_UB = prctile(params,95,2);
+        params_LB = prctile(params,5,2);
+
+        print_structural_form(sv)
+
+        F = fieldnames(pmode);
+        C = num2cell(struct2cell(pmode),3);
+        C = cellfun(@(c)[c{:}],C,'uni',0);
+        params_pmode = vertcat(C{:});
+
+        params_M_Struct=a2tilde_to_a(params_M);
+        params_UB_Struct=a2tilde_to_a(params_UB);
+        params_LB_Struct=a2tilde_to_a(params_LB);
+
+        paramsAll = a2tilde_to_a(params);
+        for ii=1:numel(F)
+            eval(['pmcmc.' F{ii} '= paramsAll(ii,:) ;'])
+        end
+
+        %% Collect Parameters
+        paramsCI_mode = [params_pmode params_pmode-(params_M_Struct-params_LB_Struct)  params_pmode+(params_UB_Struct-params_M_Struct)];
+        paramsCI_mcmc = [params_M_Struct params_LB_Struct  params_UB_Struct];
+
+        %% Print Table of Estimates
+        %         pmcmc_tex(pmode,paramsCI_mcmc,texfolder,modelname,'MCMC');
+        %
+        %         pmcmc_tex(pmode,paramsCI_mode,texfolder,[modelname '_mode'],'Mode');
+
+
+    end
+
+end
+
+
+%% Printing estimates
+clc
+
+% Printing structural form
+print_structural_form(sv)
+
+% % Printing reduced form
+% print_solution(sv)
+
+if opt.mp_restriction ==3
+    if strcmp(opt.paramsUse,'mcmc')
+
+        %% Impose Arias et al. (2019) - ex-post
+        nex       = 0;                   % set equal to 1 if a constant is included; 0 otherwise
+        nvar = size(varlist,1);
+        nlag = nlags;
+        m         = nvar*nlag + nex;     % number of exogenous variables
+        horizons  = 0:0;                 % horizons to restrict
+        NS        = 1 + numel(horizons); % number of objects in F(A_{0},A_{+}) to which we impose sign and zero restrictios: F(THETA)=[A_{0};L_{0},...,L_{horizons}]
+        e         = eye(nvar);           % create identity matrix
+        control_size = 0.1;
+        rps = size(pmcmc.a0_1_1,2)*control_size;
+        nd        = rps;                 % number of orthogonal-reduced-form (B,Sigma,Q) draws
+        Qdraws         = cell([nd,1]); % orthogonal matrices
+        storevefh      = zeros(nd,1);  % volume element f_{h}
+        storevegfhZ    = zeros(nd,1);  % volume element g o f_{h}|Z
+        uw             = zeros(nd,1);  % unnormalized importance sampler weights
+        nimp = 60;
+        %==========================================================================
+        %% identification: declare Ss and Zs matrices
+        %==========================================================================
+        % restrictions on A0  and/or IRFs
+
+        % sign restrictions
+        S = cell(nvar,1);
+        for ii=1:nvar
+            S{ii}=zeros(0,nvar*NS);
+        end
+        ns1  = 4;
+        S{1} = zeros(ns1,nvar*NS);
+        S{1}(1,1)   = -1;
+        S{1}(2,2)   = -1;
+        S{1}(3,6)   =  1;
+        S{1}(4,nvar+6)   =  1;
+
+        % zero restrictions
+        Z=cell(nvar,1);
+        for i=1:nvar
+            Z{i}=zeros(0,nvar*NS);
+        end
+
+        nz1  = 2;
+        Z{1} = zeros(nz1,nvar*NS);
+        Z{1}(1,4)=1;
+        Z{1}(2,5)=1;
+
+        %==========================================================================
+        %% Setup info
+        %==========================================================================
+        info=SetupInfo(nvar,m,Z,@(x)chol(x));
+
+        % ZF(A_{0},A_{+})
+        info.nlag     = nlag;
+        info.horizons = horizons;
+        info.ZF       = @(x,y)ZF(x,y);
+
+        % functions useful to compute the importance sampler weights
+        iw_info = info;
+        fs      = @(x)ff_h(x,iw_info);
+        r       = @(x)ZeroRestrictions(x,iw_info);
+
+        % function useful to check the sign restrictions
+        fh_S_restrictions  = @(x)SF(x,iw_info,S);
+
+        %%
+        parfor record=1:rps
+
+            % Take the draws from RISE
+            params_dr = scriptParams_FULL_companion_fixed(sv,pmcmc,record);
+            Bdraw = params_dr.B_sync_1';
+            Sigmadraw = params_dr.O_sync_1'*params_dr.O_sync_1;
+
+            %% steps 2:4 of Algorithm 2
+            w           = DrawW(iw_info);
+            x           = [vec(Bdraw); vec(Sigmadraw); w];
+            structpara  = ff_h_inv(x,iw_info);
+
+            % store the matrix Q associated with step 3
+            Qdraw            = SpheresToQ(w,iw_info,Bdraw,Sigmadraw);
+            Qdraws{record,1} = reshape(Qdraw,nvar,nvar);
+
+
+            %% check if sign restrictions hold
+            signs      = fh_S_restrictions(structpara);
+            if (sum(signs{1}*e(:,1)>0))==size(signs{1}*e(:,1),1)
+
+
+                %% compute importance sampling weights
+
+                storevefh(record,1)   = (nvar*(nvar+1)/2)*log(2)-(2*nvar+m+1)*LogAbsDet(reshape(structpara(1:nvar*nvar),nvar,nvar));
+                storevegfhZ(record,1) = LogVolumeElement(fs,structpara,r);
+                uw(record,1)          = exp(storevefh(record,1) - storevegfhZ(record,1));
+
+
+            else
+                uw(record,1) = 0;
+            end
+            disp(['Q-draws - Percent complete: ' num2str(record/rps*100) '%'])
+        end
+        imp_w  = uw/sum(uw);
+        ne = floor(1/sum(imp_w.^2));
+        valid_draws = sum(uw>0);
+        valid_id = uw>0;
+
+        %% store draws
+        Ltilde        = zeros(nimp+1,nvar,nvar,valid_draws); % define array to store IRF
+        A0tilde       = zeros(nvar,nvar,valid_draws); % define array to store A0
+        Aplustilde    = zeros(m,nvar,valid_draws); % define array to store Aplus
+        hist_is_draws = zeros(valid_draws,1);   % define array to store draws from importance sampler
+        parfor s=1:rps
+            if uw(s)>0
+                % Take the draws from RISE
+                params_dr = scriptParams_FULL_companion_fixed(sv,pmcmc,s);
+                Bdraw = params_dr.B_sync_1';
+                Sigmadraw = params_dr.O_sync_1'*params_dr.O_sync_1;
+               Qdraw       = Qdraws{s,1};
+
+                x=[reshape(Bdraw,m*nvar,1); reshape(Sigmadraw,nvar*nvar,1); Qdraw(:)];
+                structpara = f_h_inv(x,info);
+
+                LIRF =IRF_horizons(structpara, nvar, nlag, m, 0:nimp);
+                Ltemp = zeros(nimp+1,nvar,nvar);
+                for h=0:nimp
+                    Ltemp(h+1,:,:) =  LIRF(1+h*nvar:(h+1)*nvar,:);
+                end
+                Ltilde(:,:,:,s) =  Ltemp;
+                A0tilde(:,:,s)    = reshape(structpara(1:nvar*nvar),nvar,nvar);
+                Aplustilde(:,:,s) = reshape(structpara(nvar*nvar+1:end),m,nvar);
+
+            end
+            disp(['IRFs - Percent complete: ' num2str(s/rps*100) '%'])
+            id_temp = valid_id(s);
+
+        end
+        Ltilde = Ltilde(:,:,:,valid_id);
+        A0tilde = A0tilde(:,:,valid_id);
+        Aplustilde = Aplustilde(:,:,valid_id);
+
+
+        %%
+        if plotfigures ==1
+            varlist = [{'GDP' };    {'PGDP'};    {'PCOM'};    {'TR'  };    {'NBR' };    {'FFR' }];
+            shocklist = {'FFR' };
+            load("Ltildes.mat");
+
+            Ltildeq50_rise=zeros(size(Ltilde,1),size(Ltilde,2),size(Ltilde,3)); % store IRF quantile 50th
+            Ltildeq16_rise=zeros(size(Ltilde,1),size(Ltilde,2),size(Ltilde,3)); % store IRF quantile 16th
+            Ltildeq84_rise=zeros(size(Ltilde,1),size(Ltilde,2),size(Ltilde,3)); % store IRF quantile 84th
+            Ltildeq025_rise=zeros(size(Ltilde,1),size(Ltilde,2),size(Ltilde,3)); % store IRF quantile 025th
+            Ltildeq975_rise=zeros(size(Ltilde,1),size(Ltilde,2),size(Ltilde,3)); % store IRF quantile 975th
+
+
+            for ii=1:size(Ltilde,1)
+                for jj=1:size(Ltilde,2)
+                    for kk=1:size(Ltilde,3)
+                        Ltildeq50_rise(ii,jj,kk) = quantile(Ltilde(ii,jj,kk,:),0.5);
+                        Ltildeq16_rise(ii,jj,kk) = quantile(Ltilde(ii,jj,kk,:),0.16);
+                        Ltildeq84_rise(ii,jj,kk) = quantile(Ltilde(ii,jj,kk,:),0.84);
+                        Ltildeq025_rise(ii,jj,kk) = quantile(Ltilde(ii,jj,kk,:),0.025);
+                        Ltildeq975_rise(ii,jj,kk) = quantile(Ltilde(ii,jj,kk,:),0.975);
+                    end
+                end
+            end
+
+            nshocks = 1;
+            Yname = varlist;
+            for ee=1:length(nshocks)
+                pp = nshocks(ee);
+                SIZE_VARS = size(Yname,1); p_lines = floor(SIZE_VARS/3); p_cols = ceil(SIZE_VARS/p_lines); selec = 1:nvar; xaxis = 1:nimp; xaxis = xaxis';
+                h=figure('Units','normalized','Color',[0.9412 0.9412 0.9412],'outerposition',[0,0,0.8,0.8],'Name',eval(['''' cell2mat(shocklist(selec(pp))) '-shock''']));
+                figure(h);
+                for uuu=1:nvar
+                    subplot(p_lines,p_cols,uuu)
+                    temp1=[squeeze(Ltildeq50_rise(1:nimp,uuu,1)) squeeze(Ltildeq16_rise(1:nimp,uuu,1)) squeeze(Ltildeq84_rise(1:nimp,uuu,1))];
+                    grpyat = [(1:nimp)' temp1(1:nimp,2); (nimp:-1:1)' temp1(nimp:-1:1,3)];
+                    patch(grpyat(:,1),grpyat(:,2),[0.7 0.7 0.7],'edgecolor',[0.65 0.65 0.65]);  hold on;
+                    ss(2) = plot(xaxis,squeeze(Ltildeq50_rise(1:nimp,uuu,1)),'-b','LineWidth',1);
+                    ss(3) = plot(xaxis,squeeze(Ltildeq50(1:nimp,uuu,1)),'-r','LineWidth',1);
+                    plot(xaxis,squeeze(Ltildeq16(1:nimp,uuu,1)),'--r','LineWidth',1);
+                    plot(xaxis,squeeze(Ltildeq84(1:nimp,uuu,1)),'--r','LineWidth',1);
+                    plot(xaxis,zeros(nimp),':k');
+                    set(gca,'FontSize',16)
+                    title(Yname(uuu),'FontSize',16) %'FontWeight','bold',
+                    ylabel('percent','FontSize',16)
+                    xlabel('months','FontSize',16)
+                    set(gca,'XTick',0:4:nimp)
+                    axis tight
+                    hold off;
+                end
+            end
+
+            %%
+            % Equation is:
+            % (A0')*y_t = (Aplus')*y_{t-1} + e_t
+            % IRF is:
+            % y_t = inv(A0')*(Aplus')*y_{t-1} + inv(A0')*e_t
+            nshocks =1;
+            outs = zeros(1,size(A0tilde,3),nimp,nvar);
+
+            nbetas = NaN(nvar,nvar*nlags,size(A0tilde,3));
+            imps =  NaN(nvar,nvar,size(A0tilde,3));
+            parfor iii=1:size(A0tilde,3)
+                A0_dr = squeeze(A0tilde(:,:,iii));
+                Aplus_dr = squeeze(Aplustilde(:,:,iii));
+                invA0 = (A0_dr')\eye(nvar);  % CORRECT
+                IMP_dr= (A0_dr')\eye(nvar); % CORRECT
+                nbeta_dr = (invA0)*(Aplus_dr'); % CORRECT
+                nbetas(:,:,iii) = nbeta_dr;
+                imps(:,:,iii) = IMP_dr;
+                A_companion_dr=zeros(nvar*nlags,nvar*nlags);
+                A_companion_dr(1:nvar,:)=nbeta_dr(:,1:nvar*nlags);
+                A_companion_dr(nvar+1:nvar*nlags,1:nvar*nlags-nvar)=eye(nvar*nlags-nvar);
+                U1_dr=[IMP_dr; zeros(nvar*nlags-nvar,nvar)];
+                nnn_dr = size(U1_dr,1);
+                Eye_comp_dr = eye(nnn_dr)-A_companion_dr;
+                invEye_comp_dr = (Eye_comp_dr)\eye(size(Eye_comp_dr,2)); % inv(Eye_comp)
+                Zk1_dr = zeros(nvar,nimp,nvar*nlags);
+                impulse1_dr = zeros(nvar,nimp,nvar);
+                for r=nshocks
+                    for k=1:nimp
+                        Zk1_dr(r,k,:)=(A_companion_dr^(k-1)*U1_dr(:,r))';
+                    end
+                    impulse1_dr(r,:,1:end)=Zk1_dr(r,:,1:nvar);
+                    if impulse1_dr(6,1,6)<0; impulse1_dr(r,:,:) = impulse1_dr(r,:,:)*(-1);end
+                    for ss=1:nvar
+                        outs(r,iii,:,ss)=impulse1_dr(r,:,ss);
+                    end
+                end
+            end
+            nbeta_mode = squeeze(quantile(nbetas,0.5,3));
+            imp_mode =  squeeze(quantile(imps,0.5,3));
+            Yname = varlist;
+            for ee=1:length(nshocks)
+                pp = nshocks(ee);
+                SIZE_VARS = size(Yname,1); p_lines = floor(SIZE_VARS/3); p_cols = ceil(SIZE_VARS/p_lines); selec = 1:nvar; xaxis = 1:nimp; xaxis = xaxis';
+                h=figure('Units','normalized','Color',[0.9412 0.9412 0.9412],'outerposition',[0,0,0.8,0.8],'Name',eval(['''' cell2mat(shocklist(selec(pp))) '-shock''']));
+                figure(h);
+                for uuu=1:nvar
+                    subplot(p_lines,p_cols,uuu)
+                    temp=squeeze(outs(pp,:,:,uuu));
+                    temp1=squeeze(prctile(temp,bands,1))';
+                    grpyat = [(1:nimp)' temp1(1:nimp,2); (nimp:-1:1)' temp1(nimp:-1:1,3)];
+                    patch(grpyat(:,1),grpyat(:,2),[0.7 0.7 0.7],'edgecolor',[0.65 0.65 0.65]);  hold on;
+                    ss(1) = plot(xaxis,temp1(1:nimp,1),'k-','LineWidth',3); hold on;
+                    ss(2) = plot(xaxis,squeeze(Ltildeq50_rise(1:nimp,uuu,1)),'-b','LineWidth',1);
+                    plot(xaxis,zeros(nimp),':k');
+                    set(gca,'FontSize',16)
+                    title(Yname(uuu),'FontSize',16) %'FontWeight','bold',
+                    ylabel('percent','FontSize',16)
+                    xlabel('months','FontSize',16)
+                    set(gca,'XTick',0:4:nimp)
+                    axis tight
+                    hold off;
+                end
+            end
+            %%
+
+            A0tilde_11 = squeeze(A0tilde(1,1,:));
+            A0tilde_21 = squeeze(A0tilde(2,1,:));
+            A0tilde_31 = squeeze(A0tilde(3,1,:));
+            A0tilde_41 = squeeze(A0tilde(4,1,:));
+            A0tilde_51 = squeeze(A0tilde(5,1,:));
+            A0tilde_61 = squeeze(A0tilde(6,1,:));
+
+            %response to output
+            ppsiy    = -A0tilde_11./A0tilde_61;
+            %response to prices
+            ppsip    = -A0tilde_21./A0tilde_61;
+            %response to commodity prices
+            ppsipc   = -A0tilde_31./A0tilde_61;
+            %response total reserves
+            ppsitr   = -A0tilde_41./A0tilde_61;
+            %response non-borrowed reserves
+            ppsinbr  = -A0tilde_51./A0tilde_61;
+            %ssigma
+            ssigma  = 1./A0tilde_61;
+
+
+            format bank
+            disp('****************** Restrictions 1 and 2 ******************')
+            disp('Fed Funds Rate Contemporaneous Response to Output: 50-th Quantile')
+            disp(quantile(ppsiy,0.5))
+            disp('Fed Funds Rate Contemporaneous Response to Output: 16-th Quantile and 84-th Quantile')
+            disp([quantile(ppsiy,0.16),quantile(ppsiy,0.84)])
+            disp('Fed Funds Rate Contemporaneous Response to Output: 2.5-th Quantile and 97.5-th Quantile')
+            disp([quantile(ppsiy,0.025),quantile(ppsiy,0.975)])
+
+            disp('Fed Funds Rate Contemporaneous Response to Prices: 50-th Quantile')
+            disp(quantile(ppsip,0.5))
+            disp('Fed Funds Rate Contemporaneous Response to Prices: 16-th Quantile and 84-th Quantile')
+            disp([quantile(ppsip,0.16),quantile(ppsip,0.84)])
+            disp('Fed Funds Rate Contemporaneous Response to Prices: 2.5-th Quantile and 97.5-th Quantile')
+            disp([quantile(ppsip,0.025),quantile(ppsip,0.975)])
+
+
+            disp('Fed Funds Rate Contemporaneous Response to Commodity Prices: 50-th Quantile')
+            disp(quantile(ppsipc,0.5))
+            disp('Fed Funds Rate Contemporaneous Response to Commodity Prices: 16-th Quantile and 84-th Quantile')
+            disp([quantile(ppsipc,0.16),quantile(ppsipc,0.84)])
+            disp('Fed Funds Rate Contemporaneous Response to Commodity Prices: 2.5-th Quantile and 97.5-th Quantile')
+            disp([quantile(ppsipc,0.025),quantile(ppsipc,0.975)])
+
+
+            disp('Fed Funds Rate Contemporaneous Response to Total Reserves: 50-th Quantile')
+            disp(quantile(ppsitr,0.5))
+            disp('Fed Funds Rate Contemporaneous Response to Total Reserves: 16-th Quantile and 84-th Quantile')
+            disp([quantile(ppsitr,0.16),quantile(ppsitr,0.84)])
+            disp('Fed Funds Rate Contemporaneous Response to Total Reserves: 2.5-th Quantile and 97.5-th Quantile')
+            disp([quantile(ppsitr,0.025),quantile(ppsitr,0.975)])
+
+
+            disp('Fed Funds Rate Contemporaneous Response to Non-Borrowed Reserves: 50-th Quantile')
+            disp(quantile(ppsinbr,0.5))
+            disp('Fed Funds Rate Contemporaneous Response to Non-Borrowed Reserves: 16-th Quantile and 84-th Quantile')
+            disp([quantile(ppsinbr,0.16),quantile(ppsinbr,0.84)])
+            disp('Fed Funds Rate Contemporaneous Response to Non-Borrowed Reserves: 2.5-th Quantile and 97.5-th Quantile')
+            disp([quantile(ppsinbr,0.025),quantile(ppsinbr,0.975)])
+        end
+    else
+        pmode=posterior_mode(sv);
+        params_mode = scriptParams_FULL_companion_fixed(sv,pmode,1);
+
+        A0tilde = params_mode.SIG_sync_1\params_mode.A0_sync_1;
+        A0tilde_11 = A0tilde(1,1);
+        A0tilde_21 = A0tilde(2,1);
+        A0tilde_31 = A0tilde(3,1);
+        A0tilde_41 = A0tilde(4,1);
+        A0tilde_51 = A0tilde(5,1);
+        A0tilde_61 = A0tilde(6,1);
+
+        %response to output
+        ppsiy    = -A0tilde_11./A0tilde_61;
+        %response to prices
+        ppsip    = -A0tilde_21./A0tilde_61;
+        %response to commodity prices
+        ppsipc   = -A0tilde_31./A0tilde_61;
+        %response total reserves
+        ppsitr   = -A0tilde_41./A0tilde_61;
+        %response non-borrowed reserves
+        ppsinbr  = -A0tilde_51./A0tilde_61;
+        %ssigma
+        ssigma  = 1./A0tilde_61;
+
+
+        format bank
+        disp('****************** Restrictions 1 and 2 ******************')
+        disp('Fed Funds Rate Contemporaneous Response to Output: 50-th Quantile')
+        disp(quantile(ppsiy,0.5))
+        disp('Fed Funds Rate Contemporaneous Response to Output: 16-th Quantile and 84-th Quantile')
+        disp([quantile(ppsiy,0.16),quantile(ppsiy,0.84)])
+        disp('Fed Funds Rate Contemporaneous Response to Output: 2.5-th Quantile and 97.5-th Quantile')
+        disp([quantile(ppsiy,0.025),quantile(ppsiy,0.975)])
+
+        disp('Fed Funds Rate Contemporaneous Response to Prices: 50-th Quantile')
+        disp(quantile(ppsip,0.5))
+        disp('Fed Funds Rate Contemporaneous Response to Prices: 16-th Quantile and 84-th Quantile')
+        disp([quantile(ppsip,0.16),quantile(ppsip,0.84)])
+        disp('Fed Funds Rate Contemporaneous Response to Prices: 2.5-th Quantile and 97.5-th Quantile')
+        disp([quantile(ppsip,0.025),quantile(ppsip,0.975)])
+
+
+        disp('Fed Funds Rate Contemporaneous Response to Commodity Prices: 50-th Quantile')
+        disp(quantile(ppsipc,0.5))
+        disp('Fed Funds Rate Contemporaneous Response to Commodity Prices: 16-th Quantile and 84-th Quantile')
+        disp([quantile(ppsipc,0.16),quantile(ppsipc,0.84)])
+        disp('Fed Funds Rate Contemporaneous Response to Commodity Prices: 2.5-th Quantile and 97.5-th Quantile')
+        disp([quantile(ppsipc,0.025),quantile(ppsipc,0.975)])
+
+
+        disp('Fed Funds Rate Contemporaneous Response to Total Reserves: 50-th Quantile')
+        disp(quantile(ppsitr,0.5))
+        disp('Fed Funds Rate Contemporaneous Response to Total Reserves: 16-th Quantile and 84-th Quantile')
+        disp([quantile(ppsitr,0.16),quantile(ppsitr,0.84)])
+        disp('Fed Funds Rate Contemporaneous Response to Total Reserves: 2.5-th Quantile and 97.5-th Quantile')
+        disp([quantile(ppsitr,0.025),quantile(ppsitr,0.975)])
+
+
+        disp('Fed Funds Rate Contemporaneous Response to Non-Borrowed Reserves: 50-th Quantile')
+        disp(quantile(ppsinbr,0.5))
+        disp('Fed Funds Rate Contemporaneous Response to Non-Borrowed Reserves: 16-th Quantile and 84-th Quantile')
+        disp([quantile(ppsinbr,0.16),quantile(ppsinbr,0.84)])
+        disp('Fed Funds Rate Contemporaneous Response to Non-Borrowed Reserves: 2.5-th Quantile and 97.5-th Quantile')
+        disp([quantile(ppsinbr,0.025),quantile(ppsinbr,0.975)])
+    end
+else
+    %% Impulse responses
+
+    myirfs=irf(sv,[],61);
+
+    snames=fieldnames(myirfs);
+
+    ci=[16,50,68];
+
+    figure('name','Simple impulse response functions')
+    iter=0;
+    % focus on MP shock
+    shk=snames{end};
+    for iv=1:numel(varlist)
+        v=varlist{iv};
+        iter=iter+1;
+        subplot(3,2,iter)
+        ax = gca;
+        plot(myirfs.(shk).(v),'linewidth',2)
+        %     d=myirfs.(shk);
+        %     out=fanchart(d,ci);
+        %     plot_fanchart(out)
+        set(ax,'XTick',0:12:60)
+        set(ax,'XTickLabel',0:5)
+        xlabel('Years')
+        title(v)
+    end
+
+    %% IRFs
+
+    if strcmp(opt.paramsUse,'mode')
+        pmode=posterior_mode(sv);
+        params_temp = pmode;
+        rps = size(pmode.a0_1_1,2);
+    else
+        params_temp = pmcmc;
+        rps = size(pmcmc.a0_1_1,2);
+    end
+    nimp = 60;
+    nvar = size(varlist,1);
+    outs = zeros(1,rps,nimp,nvar);
+    nshocks = 6;
+
+    % Equation is:
+    % (A0)*y_t = (Aplus)*y_{t-1} + SIG*e_t
+    % IRF is:
+    % y_t = inv(A0)*(Aplus)*y_{t-1} + inv(A0)*SIG*e_t
+    nbetas = NaN(nvar,nvar*nlags,rps);
+    parfor iii=1:rps
+        %         waitbar(iii/(rps),h,'Calculating IRFs...')
+        params_dr = scriptParams_FULL_companion_fixed(sv,params_temp,iii);
+        A0_dr = params_dr.A0_sync_1;
+        Aplus_dr = params_dr.A1_sync_1;
+        invA0 = (A0_dr)\eye(nvar);  % CORRECT
+        IMP_dr= invA0*(params_dr.SIG_sync_1); % CORRECT
+        nbeta_dr = (invA0)*(Aplus_dr); % CORRECT
+        nbetas(:,:,iii) = nbeta_dr;
+        A_companion_dr=zeros(nvar*nlags,nvar*nlags);
+        A_companion_dr(1:nvar,:)=nbeta_dr(:,1:nvar*nlags);
+        A_companion_dr(nvar+1:nvar*nlags,1:nvar*nlags-nvar)=eye(nvar*nlags-nvar);
+        invIMP_dr = (IMP_dr)\eye(size(IMP_dr,2)); % inv(IMP_dr)
+        U1_dr=[IMP_dr; zeros(nvar*nlags-nvar,nvar)];
+        nnn_dr = size(U1_dr,1);
+        Eye_comp_dr = eye(nnn_dr)-A_companion_dr;
+        Zk1_dr = zeros(nvar,nimp,nvar*nlags);
+        impulse1_dr = zeros(nvar,nimp,nvar);
+        for r=nshocks
+            for k=1:nimp
+                Zk1_dr(r,k,:)=(A_companion_dr^(k-1)*U1_dr(:,r))';
+            end
+            impulse1_dr(r,:,1:end)=Zk1_dr(r,:,1:nvar);
+            if impulse1_dr(r,1,r)<0; impulse1_dr(r,:,:) = impulse1_dr(r,:,:)*(-1);end
+            for ss=1:nvar
+                outs(r,iii,:,ss)=impulse1_dr(r,:,ss);
+            end
+        end
+    end
+    nbeta_mode = squeeze(mean(nbetas,3));
+    % Figures
+    if plotfigures ==1
+        Yname = varlist;
+        for ee=1:length(nshocks)
+            pp = nshocks(ee);
+            SIZE_VARS = size(Yname,1); p_lines = floor(SIZE_VARS/3); p_cols = ceil(SIZE_VARS/p_lines); selec = 1:nvar; xaxis = 1:nimp; xaxis = xaxis';
+            h=figure('Units','normalized','Color',[0.9412 0.9412 0.9412],'outerposition',[0,0,0.8,0.8],'Name',eval(['''' cell2mat(Yname(selec(pp))) '-shock''']));
+            figure(h);
+            for uuu=1:nvar
+                subplot(p_lines,p_cols,uuu)
+                temp=squeeze(outs(pp,:,:,uuu));
+                if strcmp(opt.paramsUse,'mcmc')
+                    temp1=squeeze(prctile(temp,bands,1))';
+                    grpyat = [(1:nimp)' temp1(1:nimp,2); (nimp:-1:1)' temp1(nimp:-1:1,3)];
+                    patch(grpyat(:,1),grpyat(:,2),[0.7 0.7 0.7],'edgecolor',[0.65 0.65 0.65]);  hold on;
+                else
+                    temp1=temp;
+                end
+                ss(1) = plot(xaxis,temp1(1:nimp,1),'k-','LineWidth',3); hold on;
+                plot(xaxis,zeros(nimp),':k');
+                set(gca,'FontSize',16)
+                title(Yname(uuu),'FontSize',16) %'FontWeight','bold',
+                ylabel('percent','FontSize',16)
+                xlabel('months','FontSize',16)
+                set(gca,'XTick',0:4:nimp)
+                axis tight
+                hold off;
+            end
+        end
+    end
+
+    %%% SAVE FIGURES
+    if savefigures ==1
+        h = get(0,'children'); h = sort(h);
+        for i=1:length(h); saveas(h(i), get(h(i),'Name'), 'png'); end
+    end
+end

@@ -351,7 +351,7 @@ for ifor = myfor
                 
                 % Load or estimate mcmc
                 if exist([paramsfolder modelname '.mat'],'file')==0 || opt.force_estimate==1
-                    % Estimat posterior distribution
+                    % Estimate posterior distribution
                     run scriptEstimateMCMC.m
                     
                     % Store solution structure
